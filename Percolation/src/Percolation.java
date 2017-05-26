@@ -138,22 +138,22 @@ public class Percolation {
 		
 		//check if adjacent sites is open and do union
 		
-		System.out.println("perform union with adjacent sides and print yes/no if itsopen");
+		//System.out.println("perform union with adjacent sides and print yes/no if itsopen");
 		if( c-1 >= 0 && grid[r][c-1] == 0 ) { //left side
 			uf.union(site[r][c], site[r][c-1]);
-			System.out.println(uf.connected(site[r][c], site[r][c-1]));
+			//System.out.println(uf.connected(site[r][c], site[r][c-1]));
 		} 
 		if( c+1 <= N-1 && grid[r][c+1] == 0 ) { //right side
 			uf.union(site[r][c], site[r][c+1]);
-			System.out.println(uf.connected(site[r][c], site[r][c+1]));
+			//System.out.println(uf.connected(site[r][c], site[r][c+1]));
 		} 
 		if( r-1 >= 0 && grid[r-1][c] == 0 ) { //up 
 			uf.union(site[r][c], site[r-1][c]);
-			System.out.println(uf.connected(site[r][c], site[r-1][c]));
+			//System.out.println(uf.connected(site[r][c], site[r-1][c]));
 		}
 		if( r+1 <= N-1 && grid[r+1][c] == 0 ) { // down
 			uf.union(site[r][c], site[r+1][c]);
-			System.out.println(uf.connected(site[r][c], site[r+1][c]));
+			//System.out.println(uf.connected(site[r][c], site[r+1][c]));
 		}
 	}
 	
@@ -176,20 +176,22 @@ public class Percolation {
 		int ip = StdIn.readInt();
 		N = ip;
 		Percolation perc = new Percolation(N);
-		for(int trails=1; trails<10; ++trails) {
+		while(true) {
 			int rand_site = StdRandom.uniform(N*N);
 			for(int i=0; i<N; ++i) {
 				for(int j=0; j<N; ++j) {
 					if(site[i][j] == rand_site) {
 						perc.open(i+1, j+1);
-						perc.printit();
+						//perc.printit();
 					}
 				}
 			}
+			if(perc.percolates()) {
+				System.out.println(perc.numberOfOpenSites());
+				break;
+			}
 		}
-		System.out.println(perc.percolates());
 	}
 
 	
-
 }
