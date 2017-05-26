@@ -2,14 +2,15 @@ import edu.princeton.cs.algs4.StdIn;
 
 import edu.princeton.cs.algs4.StdRandom;
 //import edu.princeton.cs.algs4.StdStats;
-import edu.princeton.cs.algs4.QuickFindUF;
+//import edu.princeton.cs.algs4.QuickFindUF;
+import edu.princeton.cs.algs4.WeightedQuickUnionUF;
 
 public class Percolation {
 	
 	public static int N = 0;
-	public int[][] grid;
-	public static int[][] site;
-	QuickFindUF uf = new QuickFindUF(N*N);
+	private int[][] grid;
+	private static int[][] site;
+	WeightedQuickUnionUF uf = new WeightedQuickUnionUF(N*N);
 
 	public Percolation(int n) {
 		// create n-by-n grid, with all sites blocked
@@ -36,7 +37,7 @@ public class Percolation {
 		}
 		grid = tmp;
 		site = temp_site;
-		
+	/*	
 		// ensuring all sites are blocked.
 		for(int i = 0; i < n; ++i) {
 			for(int j = 0; j < n; ++j) {
@@ -54,9 +55,9 @@ public class Percolation {
 			}
 			System.out.print("\n");
 		}
-		System.out.println("----------------------------------");		
+		System.out.println("----------------------------------"); */		
 	}
-	
+	/*
 	public void printit() {
 		// ensuring all sites are blocked.
 		for(int i = 0; i < N; ++i) {
@@ -69,6 +70,7 @@ public class Percolation {
 		System.out.println("----------------------------------");		
 		
 	}
+	*/
 	
 	public boolean isFull(int row, int col) {
 		// is site (row, col) full?
