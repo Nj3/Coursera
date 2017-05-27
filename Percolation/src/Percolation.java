@@ -1,4 +1,4 @@
-import edu.princeton.cs.algs4.StdIn;
+//import edu.princeton.cs.algs4.StdIn;
 
 import edu.princeton.cs.algs4.StdRandom;
 //import edu.princeton.cs.algs4.StdStats;
@@ -175,7 +175,7 @@ public class Percolation {
 		// TODO Auto-generated method stub
 		System.out.print("Enter the size:");
 		//System.out.print("\n");
-		int ip = StdIn.readInt();
+		int ip = Integer.parseInt(args[0]);
 		N = ip;
 		Percolation perc = new Percolation(N);
 		while(true) {
