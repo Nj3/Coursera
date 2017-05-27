@@ -44,10 +44,10 @@ public class PercolationStats {
 */
 	public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub
-		int n = 10;
-		int T = 100;
-		//int n = Integer.parseInt(args[0]);
-		//int T = Integer.parseInt(args[1]);
+		//int n = 10;
+		//int T = 100;
+		int n = Integer.parseInt(args[0]);
+		int T = Integer.parseInt(args[1]);
 		PercolationStats pstats = new PercolationStats(n, T);
 		System.out.println(n);
 		
