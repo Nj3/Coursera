@@ -18,7 +18,7 @@ public class PercolationStats {
 		arg = new String[]{tmp_n, tmp_trails};
 		System.out.println(tmp_n);
 		try {
-			Percolation.main(arg);
+			Percolation.mymain(arg);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
