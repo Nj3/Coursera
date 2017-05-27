@@ -1,16 +1,13 @@
-//import edu.princeton.cs.algs4.StdIn;
 
-import edu.princeton.cs.algs4.StdRandom;
-//import edu.princeton.cs.algs4.StdStats;
-//import edu.princeton.cs.algs4.QuickFindUF;
 import edu.princeton.cs.algs4.WeightedQuickUnionUF;
 
 public class Percolation {
 	
-	public static int N = 0;
+
+	private static int N = 0;
 	private int[][] grid;
-	private static int[][] site;
-	WeightedQuickUnionUF uf = new WeightedQuickUnionUF(N*N);
+	public int[][] site;
+	private WeightedQuickUnionUF uf = new WeightedQuickUnionUF(N*N);
 
 	public Percolation(int n) {
 		// create n-by-n grid, with all sites blocked
@@ -171,29 +168,43 @@ public class Percolation {
 		return false;
 	}
 	
-	public static void mymain(String[] args) throws Exception {
+	/*
+	private static double[] mymain(int[] args) throws Exception {
 		// TODO Auto-generated method stub
-		System.out.print("Enter the size:");
+		//System.out.print("Enter the size:");
 		//System.out.print("\n");
-		int ip = Integer.parseInt(args[0]);
-		N = ip;
+		int ip = args[0];
+		int trails = args[1];
+		
+		//xt is the array which contains number of open sites when system percolates
+		double[] xt = new double[trails];
+		
+		N = ip;		
 		Percolation perc = new Percolation(N);
-		while(true) {
-			int rand_site = StdRandom.uniform(N*N);
-			for(int i=0; i<N; ++i) {
-				for(int j=0; j<N; ++j) {
-					if(site[i][j] == rand_site) {
-						perc.open(i+1, j+1);
-						//perc.printit();
+		for(int trail=0; trail<trails; ++trail) {
+			while(true) {
+				if(perc.percolates()) {
+					//System.out.println(perc.numberOfOpenSites()/(double)(N*N));
+					xt[trail]= perc.numberOfOpenSites()/(double)(N*N);
+					//System.out.println(xt[trail]);
+					break;
+				}
+				
+				int rand_site = StdRandom.uniform(N*N);
+				for(int i=0; i<N; ++i) {
+					for(int j=0; j<N; ++j) {
+						if(site[i][j] == rand_site) {
+							perc.open(i+1, j+1);
+							//perc.printit();
+						}
 					}
 				}
-			}
-			if(perc.percolates()) {
-				System.out.println(perc.numberOfOpenSites());
-				break;
+				
 			}
 		}
+		return xt;
 	}
+	*/
 
 	
 }
