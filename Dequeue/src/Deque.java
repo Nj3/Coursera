@@ -109,8 +109,18 @@ public class Deque<Item> implements Iterable<Item> {
     	}
     	
     	Item data = head.item;
-    	head = head.next;
-    	head.prev = null;
+    	if (size == 2) {
+    		head = last;
+    		head.next = null;
+    		head.prev = null;
+    	} else if (size == 1) {
+    		head = null;
+    		last = null;
+    	} else {
+    		head = head.next;
+        	head.prev = null;    		
+    	}
+    	
     	size--;
     	return data;
     }
@@ -122,8 +132,17 @@ public class Deque<Item> implements Iterable<Item> {
     	}
     	
     	Item data = last.item;
-    	last = last.prev;
-    	last.next = null;
+    	if (size == 2) {
+    		last = head;
+    		last.next = null;
+    		last.prev = null;
+    	} else if (size == 1) {
+    		head = null;
+    		last = null;
+    	} else {
+    		last = last.prev;
+        	last.next = null;    		
+    	}    	
     	size--;
     	return data;
     }
@@ -145,13 +164,33 @@ public class Deque<Item> implements Iterable<Item> {
     	for (String str:deck) {
     		System.out.println(str);
     	}
+    	System.out.println("head and last elements are:");
+    	System.out.println(deck.head.item + " " + deck.last.item);
     	System.out.println("insert over, starting delete opn");
     	System.out.println(deck.removeFirst());
     	System.out.println(deck.removeLast());
     	System.out.println(deck.removeLast());
+    	System.out.println(deck.removeLast());
+    	System.out.println(deck.removeFirst());
     	System.out.println("remaining elements in deque: ");
     	for (String str:deck) {
     		System.out.println(str);
+    	}
+    	Deque<Integer> dkint = new Deque<Integer>();
+    	dkint.addFirst(1);
+    	dkint.addLast(2);
+    	deck.addLast("hear");
+    	deck.addFirst("me");
+    	System.out.println("remaining elements in deque: ");
+    	for (Integer i:dkint) {
+    		System.out.println(i);
+    	}
+    	dkint.removeFirst();
+    	deck.removeFirst();
+    	dkint.removeFirst();
+    	System.out.println("remaining elements in deque: last ----");
+    	for (String s:deck) {
+    		System.out.println(s);
     	}
     }
 
