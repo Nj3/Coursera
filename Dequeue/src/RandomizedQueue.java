@@ -9,8 +9,8 @@ import edu.princeton.cs.algs4.StdRandom;
  * Choice of data structure - Array.
  */
 
-//public class RandomizedQueue<Item> implements Iterable<Item> {
-public class RandomizedQueue<Item> {
+public class RandomizedQueue<Item> implements Iterable<Item> {
+//public class RandomizedQueue<Item> {
 	/**
 	 * LIST OF METHODS:
 	 * public boolean isEmpty()                 // is the queue empty?
@@ -23,25 +23,32 @@ public class RandomizedQueue<Item> {
 	
 	
 	private int size = 0;
-	private int first = 0;
 	private int last = 0;
 	private Item[] rq;
-	/*
+	
 	private class ListIterator implements Iterator<Item> {
 		// Implement a ListIterator WIP
-		private Node current = first;
+		private int initial_size = size;
+		Item[] temp_array = (Item[]) new Object[initial_size];
+		private int start = 0;
+		
+		public ListIterator() {
+			for ( int i = 0; i < initial_size; ++i ) {
+				temp_array[i] = rq[i];
+			}
+			StdRandom.shuffle(temp_array);
+		}
 		
 		public boolean hasNext() {
-			return current != null;
+			return start < initial_size;
 		}
 		
 		public Item next() {
-			if (current == null) {
+			if ( !hasNext() ) {
 				throw new java.util.NoSuchElementException();
 				}
 			
-			Item item = current.item;
-			current = current.next;
+			Item item = temp_array[start++];			
 			return item;
 		}
 		
@@ -56,7 +63,7 @@ public class RandomizedQueue<Item> {
     	// return an iterator over items in order from front to end
     	return new ListIterator();
     }
-	*/
+	
 	
 	
 	public RandomizedQueue() {
@@ -109,7 +116,8 @@ public class RandomizedQueue<Item> {
 		int index_to_rm = StdRandom.uniform(size);
 		System.out.println("index chosen at random is" + index_to_rm);
 		Item item = rq[index_to_rm];
-		rq[index_to_rm] = null; //removes loitering
+		rq[index_to_rm] = rq[--last]; // when the same index is picked again, it will pick null. SO to avoid that i'm placing last number to this index.
+		rq[last] = null; //removes loitering
 		if ( item != null) size--; // It covers the scenario when index_to_rm has the same number chosen randomly before an array is resized.
 		if (size > 0 && size == rq.length/4) {
 			resize(rq.length/2);
@@ -132,15 +140,22 @@ public class RandomizedQueue<Item> {
 		System.out.println(rand_q.dequeue());
 		rand_q.display();
 		System.out.println(rand_q.dequeue());
-		rand_q.display();
+		rand_q.display();/*
 		System.out.println(rand_q.dequeue());
 		rand_q.display();
 		System.out.println(rand_q.dequeue());
 		rand_q.display();
 		System.out.println(rand_q.dequeue());
-		rand_q.display();
-		System.out.println(rand_q.dequeue());
-		rand_q.display();
+		rand_q.display();*/
+		System.out.println("Iterator check");
+		for (String s:rand_q) {
+			System.out.println(s);
+			System.out.println("Inside foreach loop");
+			for(String sin:rand_q) {
+				System.out.println(sin);
+			}
+			System.out.println();
+		}
 	}
 
 }
