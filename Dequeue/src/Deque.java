@@ -152,7 +152,7 @@ public class Deque<Item> implements Iterable<Item> {
     	// return an iterator over items in order from front to end
     	return new ListIterator();
     }
-    
+    /*
     public static void main(String[] args) {
     	// unit testing (optional)
     	Deque<String> deck = new Deque<String>();
@@ -192,6 +192,6 @@ public class Deque<Item> implements Iterable<Item> {
     	for (String s:deck) {
     		System.out.println(s);
     	}
-    }
+    } */
 
 }

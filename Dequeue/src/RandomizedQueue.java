@@ -1,6 +1,5 @@
 import java.util.Iterator;
 
-import edu.princeton.cs.algs4.StdIn;
 import edu.princeton.cs.algs4.StdRandom;
 
 /**
@@ -20,7 +19,6 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
 	 * public Item sample()                     // return (but do not remove) a random item
 	 * public Iterator<Item> iterator()         // return an independent iterator over items in random order
 	 */
-	
 	
 	private int size = 0;
 	private int last = 0;
@@ -63,9 +61,7 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
     	// return an iterator over items in order from front to end
     	return new ListIterator();
     }
-	
-	
-	
+		
 	public RandomizedQueue() {
 		// construct an empty randomized queue
 		rq = (Item[]) new Object[2];
@@ -88,13 +84,13 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
 		}
 		rq = copy;
 	}
-	
+	/*
 	private void display() {
 		for (int i=0; i<rq.length; i++) {
 			System.out.print(rq[i]);
 		}
 	}
-	/*
+	
 	private void restruct(int ind_st) {
 		for (int i = ind_st; i<size; ++i) {
 			if ( rq[i+1] != null) rq[i] = rq[i+1];
@@ -102,6 +98,10 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
 	}*/
 	
 	public void enqueue(Item item) {
+		if (item == null) {
+    		throw new java.lang.IllegalArgumentException();
+    	}
+		
 		if (size == rq.length) {
 			resize(2*size);
 		}
@@ -110,22 +110,36 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
 	}
 	
 	public Item dequeue() {
-		//StdRandom.shuffle(rq);
-		//Item item = rq[last];
-		//rq[last--] = null; // removes loitering
+		if (isEmpty()) {
+    		throw new java.util.NoSuchElementException();
+    	}
+		
 		int index_to_rm = StdRandom.uniform(size);
-		System.out.println("index chosen at random is" + index_to_rm);
+		//System.out.println("index chosen at random is" + index_to_rm);
+		
 		Item item = rq[index_to_rm];
 		rq[index_to_rm] = rq[--last]; // when the same index is picked again, it will pick null. SO to avoid that i'm placing last number to this index.
 		rq[last] = null; //removes loitering
+		
 		if ( item != null) size--; // It covers the scenario when index_to_rm has the same number chosen randomly before an array is resized.
+		
 		if (size > 0 && size == rq.length/4) {
 			resize(rq.length/2);
 		}
-		return item;
 		
+		return item;
 	}
-	public static void main(String[] args) {
+	
+	public Item sample() {
+		if (isEmpty()) {
+    		throw new java.util.NoSuchElementException();
+    	}
+		
+		int index_for_sample = StdRandom.uniform(size);
+		return rq[index_for_sample];
+	}
+	
+/*	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		RandomizedQueue<String> rand_q = new RandomizedQueue<String>();
 		int i= 0;
@@ -140,13 +154,8 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
 		System.out.println(rand_q.dequeue());
 		rand_q.display();
 		System.out.println(rand_q.dequeue());
-		rand_q.display();/*
-		System.out.println(rand_q.dequeue());
 		rand_q.display();
-		System.out.println(rand_q.dequeue());
-		rand_q.display();
-		System.out.println(rand_q.dequeue());
-		rand_q.display();*/
+	
 		System.out.println("Iterator check");
 		for (String s:rand_q) {
 			System.out.println(s);
@@ -156,6 +165,16 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
 			}
 			System.out.println();
 		}
-	}
+		
+		System.out.println(rand_q.dequeue());
+		rand_q.display();
+		System.out.println(rand_q.dequeue());
+		rand_q.display();
+		System.out.println(rand_q.dequeue());
+		rand_q.display();
+		rand_q.enqueue("100");
+		System.out.println();
+		rand_q.display();
+	}*/
 
 }
