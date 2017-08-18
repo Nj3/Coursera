@@ -10,7 +10,7 @@ public class selection_sort {
 		a[j] = swap;
 	}
 	
-	public void sort(int[] arr) {
+	private void sort(int[] arr) {
 		int len = arr.length;
 		for ( int i = 0; i < len; ++i ) {
 			int min = i;

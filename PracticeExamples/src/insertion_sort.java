@@ -11,7 +11,7 @@ public class insertion_sort {
 		a[j] = swap;
 	}
 	
-	public void sort(int[] arr) {
+	private void sort(int[] arr) {
 		int len = arr.length;
 		for ( int i = 0; i < len; ++i ) {
 			//swap if a[i] > a[j]
@@ -26,7 +26,7 @@ public class insertion_sort {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		int[] ip = new int[] {1, 5, -1, 0, 2};
-		selection_sort res = new selection_sort();
+		insertion_sort res = new insertion_sort();
 		res.sort(ip);
 		for (int o: ip) {
 			System.out.println(o);

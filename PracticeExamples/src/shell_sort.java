@@ -12,17 +12,18 @@ public class shell_sort {
 		a[j] = swap;
 	}
 	
-	public void sort(int[] arr) {
+	private void sort(int[] arr) {
 		int N = arr.length;
 		//Maintain a stack to create the increments in which it will be h-sorted
 		Stack<Integer> inc = new Stack<Integer>();
 		int x = 0;
-		while (x < N) {
+		while ( (3*x + 1) < N) {
 			inc.push(3*x + 1);
+			++x;
 		}
 		
 		while (!inc.empty()) {
-			int h = inc.pop() - 1;
+			int h = inc.pop();
 		
 			for (int i=0; i<N && i+h < N; i++) {
 				for (int j=i+h; j-h>=0; j-=h) {
@@ -36,7 +37,7 @@ public class shell_sort {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		int[] ip = new int[] {1, 5, -1, 0, 2, 22, 18, 1, -500, 30, 102, 15002, 3, -11};
-		selection_sort res = new selection_sort();
+		shell_sort res = new shell_sort();
 		res.sort(ip);
 		for (int o: ip) {
 			System.out.println(o);
