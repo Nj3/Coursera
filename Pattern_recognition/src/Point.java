@@ -1,5 +1,4 @@
 
-import java.util.Arrays;
 import java.util.Comparator;
 import edu.princeton.cs.algs4.StdDraw;
 
@@ -50,7 +49,9 @@ public class Point implements Comparable<Point> {
      */
     public double slopeTo(Point that) {
         double slope = (double) (that.y -  this.y) / (that.x - this.x);
-        if ( slope == +0.0 || slope == -0.0) return +0.0;
+        if ( this.y == that.y && this.x != that.x ) return +0.0;
+        else if ( this.x == that.x && this.y != that.y ) return Double.POSITIVE_INFINITY;
+        else if ( this.x == that.x && this.y == that.y ) return Double.NEGATIVE_INFINITY;
         else return slope;
     }
 
@@ -70,7 +71,7 @@ public class Point implements Comparable<Point> {
         if (this.y == that.y && this.x == that.x) return 0;
         else if (this.y < that.y) return -1;
         else if (this.y == that.y && this.x < that.x) return -1;
-        else return 1;
+        else return +1;
     }
 
     /**
@@ -79,18 +80,16 @@ public class Point implements Comparable<Point> {
      *
      * @return the Comparator that defines this ordering on points
      */
-    public final Comparator<Point> slopeOrder = new slopeOrder();
-    
-    private class slopeOrder implements Comparator<Point> {
-    	
+    public Comparator<Point> slopeOrder  = new Comparator<Point>() {
+    	@Override
     	public int compare(Point a, Point b) {
     		double slope_of_a = slopeTo(a);
     		double slope_of_b = slopeTo(b);
-    		if ( slope_of_a < slope_of_b ) return -1;
-    		else if (slope_of_a == slope_of_b ) return 0;
+    		if (slope_of_a < slope_of_b) return -1;
+    		else if (slope_of_a == slope_of_b) return 0;
     		else return +1;
     	}
-    }
+    };
 
 
     /**
@@ -104,24 +103,20 @@ public class Point implements Comparable<Point> {
         return "(" + x + ", " + y + ")";
     }
     
+    /*
 	public static void main(String[] args) {
 		// TODO Unit testing
-		Point p1 = new Point(5,0);
-		Point p2 = new Point(5,5);
-		Point p3 = new Point(1,7);
-		Point[] p = new Point[] {p1,p2,p3};
-		System.out.println(p1.toString());
-		System.out.println(p2.toString());
-		System.out.println(p3.toString());
-		System.out.println(p1.slopeTo(p2));
-		System.out.println(p2.slopeTo(p3));
-		Arrays.sort(p, 0, 2, Point.slopeOrder);
-		/*
-		StdDraw.setPenRadius(0.05);
-		StdDraw.setPenColor(StdDraw.BLUE);
-		StdDraw.point(0.5, 0.5);
-		StdDraw.setPenColor(StdDraw.MAGENTA);
-		StdDraw.line(0.2, 0.2, 0.8, 0.2); */
-	}
+		Point[] p = new Point[3];
+		Point p_invoke = new Point(4, -1);
+		p[0] = new Point(5,0);
+		p[1] = new Point(5,0);
+		p[2] = new Point(1,7);
+		System.out.println(p[0].toString());
+		System.out.println(p[1].toString());
+		System.out.println(p[2].toString());
+		System.out.println(p[0].slopeTo(p[1]));
+		System.out.println(p[1].slopeTo(p[2]));
+		System.out.println(p_invoke.slopeOrder.compare(p[0], p[1]));
+	} */
 
 }
