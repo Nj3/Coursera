@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class BruteCollinearPoints {
@@ -7,13 +8,13 @@ public class BruteCollinearPoints {
 	 * @param points - list of points in (x,y) form.
 	 */
 	private int num_of_lines = 0;
-	private LineSegment[] ls;
+	private ArrayList<LineSegment> ls = new ArrayList<LineSegment>();
 	
 	// have to change logic
 	
 	public BruteCollinearPoints(Point[] points) {
 		// finds all line segments containing 4 points
-		Arrays.sort(points);
+		// Arrays.sort(points);
 		
 		/* Sorted output to check
 		int N = points.length;
@@ -22,19 +23,32 @@ public class BruteCollinearPoints {
 		} */
 		
 		int N = points.length;
-		ls = new LineSegment[N-3];
-		for ( int i=0; i<N-3; ++i ) {
-			double p2q_slope = points[i].slopeTo(points[i+1]);
-			double p2r_slope = points[i].slopeTo(points[i+2]);
-			double p2s_slope = points[i].slopeTo(points[i+3]);
-			System.out.printf("%f, %f, %f",p2q_slope , p2r_slope ,  p2s_slope);
-			if ( p2q_slope == p2r_slope && p2r_slope == p2s_slope ) {
-				ls[i] = new LineSegment(points[i], points[i+3]);
-				num_of_lines++;
+		for (int p=0; p<N; ++p) {
+			for (int q=0; q<N; ++q) {
+				if ( p==q || p>q ) continue;
+				double slope_p2q = points[p].slopeTo(points[q]);
+				for (int r=0; r<N; ++r) {
+					if ( p==r || q==r || p==q || q>r) continue;
+					double slope_p2r = points[p].slopeTo(points[r]);
+					if ( slope_p2q != slope_p2r ) continue;
+					for (int s=0;  s<N; ++s) {
+						if ( r==s || p==s || q==s || p==r || q==r || p==q || r>s ) continue;
+						double slope_p2s = points[p].slopeTo(points[s]);
+						if ( slope_p2q == slope_p2r && slope_p2q == slope_p2s ) {
+							Point[] tmp = new Point[] {points[p], points[q], points[r], points[s]};
+							Arrays.sort(tmp);
+							System.out.println(Arrays.toString(tmp));
+							ls.add(new LineSegment(tmp[0], tmp[3]));
+							num_of_lines++;
+						}
+					}
+				}
 			}
 		}
+		
 	}
 	
+
 	public int numberOfSegments() {
 		// the number of line segments
 		return num_of_lines;
@@ -42,7 +56,13 @@ public class BruteCollinearPoints {
 	
 	public LineSegment[] segments() {
 		// the line segments which is collinear
-		return ls;
+		ArrayList<LineSegment> temp = new ArrayList<LineSegment>();
+		for( LineSegment ln : ls ) {
+			if ( !temp.contains(ln) ) temp.add(ln);
+		}
+		LineSegment[] result = new LineSegment[num_of_lines];
+		temp.toArray(result);
+		return result;
 	}
 
 }
