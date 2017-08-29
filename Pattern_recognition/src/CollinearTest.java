@@ -14,7 +14,7 @@ public class CollinearTest {
 		// TODO UNIT TESTING
 		// read the n points from a file
 //	    In in = new In(args[0]);
-		String f = "/home/itachi1793/workspace/Pattern_recognition/src/collinear/input10.txt";
+		String f = "/home/itachi1793/workspace/Pattern_recognition/src/collinear/input6.txt";
 	    In in = new In(f);
 	    int n = in.readInt();
 	    Point[] points = new Point[n];
@@ -36,11 +36,19 @@ public class CollinearTest {
 	    // print and draw the line segments
 	    BruteCollinearPoints collinear = new BruteCollinearPoints(points);
 	    for (LineSegment segment : collinear.segments()) {
-	        StdOut.println(segment.toString());
+	        StdOut.println(segment);
 	        segment.draw();
 	    }
 	    StdDraw.show();
 	    
+	    System.out.println("separating both parts");
+	    //fast collinear
+	    FastCollinearPoints fc = new FastCollinearPoints(points);
+	    for (LineSegment segment : fc.segments()) {
+	        StdOut.println(segment);
+	        segment.draw();
+	    }
+	    StdDraw.show();
 	    }
 
 }

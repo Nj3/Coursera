@@ -80,7 +80,9 @@ public class Point implements Comparable<Point> {
      *
      * @return the Comparator that defines this ordering on points
      */
-    public Comparator<Point> slopeOrder  = new Comparator<Point>() {
+    public Comparator<Point> slopeOrder  = new SlopeOrder();
+    
+    private class SlopeOrder implements Comparator<Point> {
     	@Override
     	public int compare(Point a, Point b) {
     		double slope_of_a = slopeTo(a);

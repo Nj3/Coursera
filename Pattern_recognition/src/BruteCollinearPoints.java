@@ -14,14 +14,11 @@ public class BruteCollinearPoints {
 	
 	public BruteCollinearPoints(Point[] points) {
 		// finds all line segments containing 4 points
-		// Arrays.sort(points);
 		
-		/* Sorted output to check
-		int N = points.length;
-		for ( int i=0; i<N; ++i ) {
-			System.out.println(points[i]);
-		} */
+		// check parameters
+		checkIllegalParam(points);
 		
+		// finding list of collinear points
 		int N = points.length;
 		for (int p=0; p<N; ++p) {
 			for (int q=0; q<N; ++q) {
@@ -37,7 +34,7 @@ public class BruteCollinearPoints {
 						if ( slope_p2q == slope_p2r && slope_p2q == slope_p2s ) {
 							Point[] tmp = new Point[] {points[p], points[q], points[r], points[s]};
 							Arrays.sort(tmp);
-							System.out.println(Arrays.toString(tmp));
+							//System.out.println(Arrays.toString(tmp));
 							ls.add(new LineSegment(tmp[0], tmp[3]));
 							num_of_lines++;
 						}
@@ -57,12 +54,25 @@ public class BruteCollinearPoints {
 	public LineSegment[] segments() {
 		// the line segments which is collinear
 		ArrayList<LineSegment> temp = new ArrayList<LineSegment>();
-		for( LineSegment ln : ls ) {
-			if ( !temp.contains(ln) ) temp.add(ln);
+		for (LineSegment ln: ls) {
+			if ( !temp.toString().contains(ln.toString())) temp.add(ln);
 		}
-		LineSegment[] result = new LineSegment[num_of_lines];
+		LineSegment[] result = new LineSegment[temp.size()];
 		temp.toArray(result);
 		return result;
+	}
+	
+	private void checkIllegalParam(Point[] points) {
+		
+		// check if parameter is null
+		if (points == null) throw new java.lang.IllegalArgumentException();
+		
+		// check if any point in array is null (or) any point is repeated.
+		for (int i=0; i<points.length; ++i) {
+			for (int j=i+1; j<points.length; ++j) {
+				if ( points[i] == null || points[i].compareTo(points[j]) == 0 ) throw new IllegalArgumentException();
+			}
+		}
 	}
 
 }
