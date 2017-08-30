@@ -14,7 +14,7 @@ public class CollinearTest {
 		// TODO UNIT TESTING
 		// read the n points from a file
 //	    In in = new In(args[0]);
-		String f = "/home/itachi1793/workspace/Pattern_recognition/src/collinear/input6.txt";
+		String f = "/home/itachi1793/workspace/Pattern_recognition/src/collinear/equidistant.txt";
 	    In in = new In(f);
 	    int n = in.readInt();
 	    Point[] points = new Point[n];

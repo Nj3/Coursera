@@ -32,15 +32,14 @@ public class FastCollinearPoints {
 		sorted_pts = Arrays.copyOf(points, N);
 		
 		for ( int p = 0; p < N; ++p ) {
-			Arrays.sort(sorted_pts, points[p].slopeOrder);
+			Arrays.sort(sorted_pts, points[p].slopeOrder());
 			int collinearCount = 0;
 			double prevSlope = 0.0;
 			ArrayList<Point> colnr = new ArrayList<Point>();
-			for ( int q = 0; q < N; ++q ) {
-				if ( points[p].equals(sorted_pts[q]) ) 	continue;
-				
+			for ( int q = 1; q < N; ++q ) {
 				double currSlope = points[p].slopeTo(sorted_pts[q]);
-				if ( collinearCount == 0 ) {
+				
+				if ( collinearCount == 0 && q == 1) {
 					colnr.add(sorted_pts[q]);
 					collinearCount = 1;
 					prevSlope = currSlope;
@@ -55,18 +54,37 @@ public class FastCollinearPoints {
 					if ( collinearCount >=3 && q == N-1 ) {
 						colnr.add(points[p]);
 						Collections.sort(colnr);
-						ls.add(new LineSegment(colnr.get(0), colnr.get(colnr.size()-1)));
-						num_of_lines++;
+						LineSegment ln = new LineSegment(colnr.get(0), colnr.get(colnr.size()-1));
+						if ( !isDuplicateLine(ln) ) {
+							ls.add(ln);
+							num_of_lines++;
+						}	
 					}
 				}else if ( currSlope != prevSlope && collinearCount >=3 ) {
 					colnr.add(points[p]);
 					Collections.sort(colnr);
-					ls.add(new LineSegment(colnr.get(0), colnr.get(colnr.size()-1)));
-					num_of_lines++;
+					LineSegment ln = new LineSegment(colnr.get(0), colnr.get(colnr.size()-1));
+					if ( !isDuplicateLine(ln) ) {
+						ls.add(ln);
+						num_of_lines++;
+					}
 					prevSlope = currSlope;
+					colnr.clear();
+					collinearCount = 1;
+					colnr.add(sorted_pts[q]);
 				}else System.out.println("How did it even come here?");
 			}
 		}
+	}
+	
+	private boolean isDuplicateLine(LineSegment ln) {
+		if ( ls.size() == 0 ) return false;
+		else {
+			for ( LineSegment t : ls ) {
+				if ( t.equals(ln) ) return true; // override equals?
+			}
+			return false;
+		}	
 	}
 	
 	public int numberOfSegments() {
@@ -76,14 +94,9 @@ public class FastCollinearPoints {
 	
 	public LineSegment[] segments() {
 		// the line segments
-		ArrayList<LineSegment> temp = new ArrayList<LineSegment>();
-		for (LineSegment ln: ls) {
-			if ( !temp.toString().contains(ln.toString())) temp.add(ln);
-		}
-		LineSegment[] result = new LineSegment[temp.size()];
-		temp.toArray(result);
+		LineSegment[] result = new LineSegment[num_of_lines];
+		ls.toArray(result);
 		return result;
-		
 	}
 
 	/* checks whether parameter is null or contain any elements which has reference to null

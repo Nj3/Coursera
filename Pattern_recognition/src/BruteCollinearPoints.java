@@ -51,14 +51,11 @@ public class BruteCollinearPoints {
 		return num_of_lines;
 	}
 	
+	
 	public LineSegment[] segments() {
 		// the line segments which is collinear
-		ArrayList<LineSegment> temp = new ArrayList<LineSegment>();
-		for (LineSegment ln: ls) {
-			if ( !temp.toString().contains(ln.toString())) temp.add(ln);
-		}
-		LineSegment[] result = new LineSegment[temp.size()];
-		temp.toArray(result);
+		LineSegment[] result = new LineSegment[num_of_lines];
+		ls.toArray(result);
 		return result;
 	}
 	
@@ -69,8 +66,9 @@ public class BruteCollinearPoints {
 		
 		// check if any point in array is null (or) any point is repeated.
 		for (int i=0; i<points.length; ++i) {
+			if (points[i] == null ) throw new java.lang.IllegalArgumentException();
 			for (int j=i+1; j<points.length; ++j) {
-				if ( points[i] == null || points[i].compareTo(points[j]) == 0 ) throw new IllegalArgumentException();
+				if ( points[i].compareTo(points[j]) == 0 ) throw new java.lang.IllegalArgumentException();
 			}
 		}
 	}
