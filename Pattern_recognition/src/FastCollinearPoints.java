@@ -1,6 +1,9 @@
+import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Nj3
@@ -10,9 +13,10 @@ import java.util.Collections;
  */
 public class FastCollinearPoints {
 	
-	private ArrayList<LineSegment> ls = new ArrayList<LineSegment>();
+	private List<LineSegment> ls = new ArrayList<LineSegment>();
 	private Point[] sorted_pts;
 	private int num_of_lines = 0;
+	private Map<Integer, Point[]> linePoints = new HashMap<Integer, Point[]>();
 	
 	/*
 	 * @param points - list of points from which collinear points are to be found.
@@ -55,33 +59,33 @@ public class FastCollinearPoints {
 						colnr.add(points[p]);
 						Collections.sort(colnr);
 						LineSegment ln = new LineSegment(colnr.get(0), colnr.get(colnr.size()-1));
-						if ( !isDuplicateLine(ln) ) {
+						if ( !isDuplicateLine(colnr.get(0), colnr.get(colnr.size()-1)) ) {
+							linePoints.put(++num_of_lines, new Point[] {colnr.get(0), colnr.get(colnr.size()-1)});
 							ls.add(ln);
-							num_of_lines++;
 						}	
 					}
 				}else if ( currSlope != prevSlope && collinearCount >=3 ) {
 					colnr.add(points[p]);
 					Collections.sort(colnr);
 					LineSegment ln = new LineSegment(colnr.get(0), colnr.get(colnr.size()-1));
-					if ( !isDuplicateLine(ln) ) {
+					if ( !isDuplicateLine(colnr.get(0), colnr.get(colnr.size()-1)) ) {
+						linePoints.put(++num_of_lines, new Point[] {colnr.get(0), colnr.get(colnr.size()-1)});
 						ls.add(ln);
-						num_of_lines++;
 					}
 					prevSlope = currSlope;
 					colnr.clear();
 					collinearCount = 1;
 					colnr.add(sorted_pts[q]);
-				}else System.out.println("How did it even come here?");
+				}
 			}
 		}
 	}
 	
-	private boolean isDuplicateLine(LineSegment ln) {
+	private boolean isDuplicateLine(Point startPoint, Point endPoint) {
 		if ( ls.size() == 0 ) return false;
 		else {
-			for ( LineSegment t : ls ) {
-				if ( t.equals(ln) ) return true; // override equals?
+			for ( Point[] pts : linePoints.values() ) {
+				if ( pts[0] == startPoint && pts[1] == endPoint ) return true;
 			}
 			return false;
 		}	
@@ -111,8 +115,9 @@ public class FastCollinearPoints {
 		
 		// check if any point in array is null (or) any point is repeated.
 		for (int i=0; i<points.length; ++i) {
+			if (points[i] == null ) throw new java.lang.IllegalArgumentException();
 			for (int j=i+1; j<points.length; ++j) {
-				if ( points[i] == null || points[i].compareTo(points[j]) == 0 ) throw new IllegalArgumentException();
+				if ( points[i].compareTo(points[j]) == 0 ) throw new java.lang.IllegalArgumentException();;
 			}
 		}
 	}

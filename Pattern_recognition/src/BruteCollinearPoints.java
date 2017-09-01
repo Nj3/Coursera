@@ -1,5 +1,8 @@
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class BruteCollinearPoints {
 	/* constructor will sort the point in ascending order
@@ -8,7 +11,8 @@ public class BruteCollinearPoints {
 	 * @param points - list of points in (x,y) form.
 	 */
 	private int num_of_lines = 0;
-	private ArrayList<LineSegment> ls = new ArrayList<LineSegment>();
+	private List<LineSegment> ls = new ArrayList<LineSegment>();
+	private Map<Integer, Point[]> linePoints = new HashMap<Integer, Point[]>();
 	
 	// have to change logic
 	
@@ -34,9 +38,10 @@ public class BruteCollinearPoints {
 						if ( slope_p2q == slope_p2r && slope_p2q == slope_p2s ) {
 							Point[] tmp = new Point[] {points[p], points[q], points[r], points[s]};
 							Arrays.sort(tmp);
-							//System.out.println(Arrays.toString(tmp));
-							ls.add(new LineSegment(tmp[0], tmp[3]));
-							num_of_lines++;
+							if ( !isDuplicateLine(tmp[0], tmp[3]) ) {
+								linePoints.put(++num_of_lines, new Point[] {tmp[0], tmp[3]});
+								ls.add(new LineSegment(tmp[0], tmp[3]));
+							}
 						}
 					}
 				}
@@ -57,6 +62,16 @@ public class BruteCollinearPoints {
 		LineSegment[] result = new LineSegment[num_of_lines];
 		ls.toArray(result);
 		return result;
+	}
+	
+	private boolean isDuplicateLine(Point startPoint, Point endPoint) {
+		if ( ls.size() == 0 ) return false;
+		else {
+			for ( Point[] pts : linePoints.values() ) {
+				if ( pts[0] == startPoint && pts[1] == endPoint ) return true;
+			}
+			return false;
+		}	
 	}
 	
 	private void checkIllegalParam(Point[] points) {
