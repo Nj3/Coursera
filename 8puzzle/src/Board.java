@@ -2,10 +2,11 @@ import java.util.Stack;
 
 public class Board {
 	
-	private final int[] bord; 
+	private int[] bord; 
 	private final int N;
 	private final int[][] board2D;
 	private Stack<Board> neighbours = new Stack<Board>();
+	private int manhattanDist = 0;
 	/*
 	 * construct a board from an n-by-n array of blocks
 	 * where blocks[i][j] = block in row i, column j
@@ -18,6 +19,17 @@ public class Board {
 		for ( int i=0; i<N; ++i ) {
 			for ( int j=0; j<N; ++j ) {
 				bord[k++] = blocks[i][j];
+				
+				// if block is zero(i.e., blank no need to calculate manhattanDist)
+				if ( blocks[i][j] == 0 ) continue;
+				
+				// Desired 2D position
+				int val = blocks[i][j] - 1;
+				int x = val / N;
+				int y = val % N;
+				
+				if ( i==x && j==y ) continue; // Blocks are already in position
+				manhattanDist += (Math.abs(i - x) + Math.abs(j - y));
 			}
 		}
 	}
@@ -43,30 +55,8 @@ public class Board {
 	/*
 	 * sum of Manhattan distances between blocks and goal
 	 */
-	public int manhattan() { // try compute this while constructing the game board.
-		int manhattanDistance = 0;
-		for ( int i=0; i<N*N; ++i ) {
-			// No need to calculate manhattan distance for blank block denoted by '0'
-			if ( bord[i] == 0 ) continue;
-			
-			int elemDist = 0;
-			
-			// 2D array index conversion
-			int a = i / N;
-			int b = i % N;
-			
-			// Desired 2d Array index
-			int val = bord[i] - 1;
-			int x = val / N;
-			int y = val % N;
-			
-			if ( a == x && b == y) continue; // blocks are already in position.
-			elemDist = Math.abs(a - x) + Math.abs(b - y);
-			
-			// Adding element level manhattan distance to board level manhattan distance
-			manhattanDistance += elemDist;
-		}
-		return manhattanDistance;
+	public int manhattan() { 
+		return manhattanDist;
 	}
 	
 	/*
@@ -161,11 +151,11 @@ public class Board {
 	 * Creates a game board and pushes it in neighbour Stack
 	 */
 	private void neighbourBoardGenerator(int[] zeroIndex, int neighbourPos) {
-		int[] leftIndex = new int[2];
-		leftIndex = indexConverter(neighbourPos, N);
-		int[][] boardLeft = new int[N][N];
-		boardLeft = swap(zeroIndex[0], zeroIndex[1], leftIndex[0], leftIndex[1]);
-		neighbours.push(new Board(boardLeft));	
+		int[] Index = new int[2];
+		Index = indexConverter(neighbourPos, N);
+		int[][] board = new int[N][N];
+		board = swap(zeroIndex[0], zeroIndex[1], Index[0], Index[1]);
+		neighbours.push(new Board(board));	
 	}
 
 	/*
@@ -182,22 +172,22 @@ public class Board {
 		// Calculation of neighbours
 		
 		// Left
-		if ( zeroPos - 1 > 0 ) {
+		if ( zeroIndex[1] - 1 >= 0 ) {
 			int neighbourLeft = zeroPos - 1;
 			neighbourBoardGenerator(zeroIndex, neighbourLeft);
 		}
 		// right
-		if ( zeroPos + 1 < N ) {
+		if ( zeroIndex[1] + 1 < N ) {
 			int neighbourRight = zeroPos + 1;
 			neighbourBoardGenerator(zeroIndex, neighbourRight);
 		}
 		// up
-		if ( zeroPos - N > 0 ) {
+		if ( zeroIndex[0] - 1 >= 0 ) {
 			int neighbourUp = zeroPos - N;
 			neighbourBoardGenerator(zeroIndex, neighbourUp);
 		}
 		// down
-		if ( zeroPos + N < N ) {
+		if ( zeroIndex[0] + 1 < N ) {
 			int neighbourDown = zeroPos + N;
 			neighbourBoardGenerator(zeroIndex, neighbourDown);
 		}
