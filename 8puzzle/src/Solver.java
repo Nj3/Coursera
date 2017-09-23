@@ -36,8 +36,8 @@ public class Solver {
 		List<Board> exploredNodes = new ArrayList<Board>();
 		Board searchNode = initial;
 		Board searchNodeTwin = initial.twin();
-		exploredNodes.add(searchNode);
-		exploredNodes.add(searchNodeTwin);
+		gameTree.insert(searchNode);
+		twinGameTree.insert(searchNodeTwin);
 		
 		// To check whether initial node is in goal state.
 		if ( searchNode.isGoal() ) {
@@ -48,36 +48,52 @@ public class Solver {
 			return;
 		}
 		
+		int n = 0;
 		// Iterating through the tree to find the paths
-		while ( true ) {
-				
-			// solving for actual board and add in goalpaths, map of num of moves to reach the goal and path taken to achieve it
-			for ( Board b : searchNode.neighbors() ) {
-				if ( !exploredNodes.contains(b) ) gameTree.insert(b);
-			}
+		while ( n < 10 ) {
 			
 			searchNode = gameTree.delMin();
-			exploredNodes.add(searchNode);
-			path.add(searchNode);
-			numOfMoves++;
 			
 			if ( searchNode.isGoal() ) {
 				isSolvable = true;
 				goalPaths.put(numOfMoves, path);
+				for ( Board b : path ) System.out.println(b);
+				numOfMoves = 0;
+				if ( gameTree.isEmpty() ) return;
 			}
+			// solving for actual board and add in goalpaths, map of num of moves to reach the goal and path taken to achieve it
+			if ( !exploredNodes.contains(searchNode) ) {
+				for ( Board b : searchNode.neighbors() ) {
+					if ( !exploredNodes.contains(b) ) gameTree.insert(b);
+				}
+			}
+			
+			exploredNodes.add(searchNode);
+			path.add(searchNode);
+			numOfMoves++;
+			//System.out.println(" The search node in this iteration is :");
+			//System.out.println(searchNode);		
+			System.out.println(gameTree.size());
+			System.out.println(goalPaths.toString());
 			
 			// solving the twin board. if its solvable then the initial board is unsolvable.
-			for ( Board b : searchNodeTwin.neighbors() ) {
-				if ( !exploredNodes.contains(b) ) twinGameTree.insert(b);
-			}
-			
-			searchNodeTwin = twinGameTree.delMin();
-			exploredNodes.add(searchNodeTwin);
+			searchNodeTwin = twinGameTree.delMin();	
 			
 			if ( searchNodeTwin.isGoal() ) {
 				isSolvable = false;
 				return;
 			}
+			
+			if ( !exploredNodes.contains(searchNodeTwin) ) {
+				for ( Board b : searchNodeTwin.neighbors() ) {
+					if ( !exploredNodes.contains(b) ) twinGameTree.insert(b);
+				}
+			}
+			
+			exploredNodes.add(searchNodeTwin);
+			
+			
+			n++;
 		}
 	}
 	
