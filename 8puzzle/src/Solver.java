@@ -1,6 +1,7 @@
 import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.TreeMap;
 
 import edu.princeton.cs.algs4.MinPQ;
 
@@ -11,44 +12,72 @@ import edu.princeton.cs.algs4.MinPQ;
  */
 public class Solver {
 	
-	private List<Board> exploredNodes = new ArrayList<Board>();
+	private TreeMap<Integer, List<Board>> goalPaths = new TreeMap<Integer, List<Board>>();
 	private int numOfMoves = 0;
 	private boolean isSolvable = false;
-	// a linked list for answer?
 	/*
 	 * find a solution to the initial board (using the A* algorithm)
 	 * Variable list:
-	 * 1. gameTree -> actual game tree which will be using it for solving.
-	 * 2. twinGameTree -> game tree formed after finding twin of initial board.
-	 * 3. searchNode -> Node which will be expanded at every iteration till 
-	 * puzzle is solved.
-	 * 
+	 * 1. gameTree      -> actual game tree which will be using it for solving.
+	 * 2. twinGameTree  -> game tree formed after finding twin of initial board.
+	 * 3. searchNode    -> Node which will be expanded at every iteration till puzzle is solved.
+	 * 4. path          -> way the board moved by sliding the blocks inside the board.
+	 * 5. exploredNodes -> list of game boards which is already expanded.
+	 * 6. searchNodeTwin-> node which will be expanded at every iteration where the source is twin of initial game board.
 	 */
 	public Solver(Board initial) {
 		if ( initial == null ) throw new java.lang.IllegalArgumentException();
 		
 		// local variable declarations
-		MinPQ<Board> gameTree = new MinPQ<Board>();
-		MinPQ<Board> twinGameTree = new MinPQ<Board>();
+		PriorityOrder po = new PriorityOrder();
+		MinPQ<Board> gameTree = new MinPQ<Board>(po);
+		MinPQ<Board> twinGameTree = new MinPQ<Board>(po);
+		List<Board> path = new ArrayList<Board>();
+		List<Board> exploredNodes = new ArrayList<Board>();
 		Board searchNode = initial;
+		Board searchNodeTwin = initial.twin();
 		exploredNodes.add(searchNode);
-		exploredNodes.add(searchNode.twin());
+		exploredNodes.add(searchNodeTwin);
 		
+		// To check whether initial node is in goal state.
+		if ( searchNode.isGoal() ) {
+			isSolvable = true;
+			return;
+		}else if ( searchNodeTwin.isGoal() ) {
+			isSolvable = false;
+			return;
+		}
+		
+		// Iterating through the tree to find the paths
 		while ( true ) {
+				
+			// solving for actual board and add in goalpaths, map of num of moves to reach the goal and path taken to achieve it
+			for ( Board b : searchNode.neighbors() ) {
+				if ( !exploredNodes.contains(b) ) gameTree.insert(b);
+			}
+			
+			searchNode = gameTree.delMin();
+			exploredNodes.add(searchNode);
+			path.add(searchNode);
+			numOfMoves++;
+			
 			if ( searchNode.isGoal() ) {
 				isSolvable = true;
+				goalPaths.put(numOfMoves, path);
+			}
+			
+			// solving the twin board. if its solvable then the initial board is unsolvable.
+			for ( Board b : searchNodeTwin.neighbors() ) {
+				if ( !exploredNodes.contains(b) ) twinGameTree.insert(b);
+			}
+			
+			searchNodeTwin = twinGameTree.delMin();
+			exploredNodes.add(searchNodeTwin);
+			
+			if ( searchNodeTwin.isGoal() ) {
+				isSolvable = false;
 				return;
 			}
-			
-			// solving for actual board
-			
-			for ( Board b : searchNode.neighbors() ) {
-				if ( !exploredNodes.contains(b) ) {
-					gameTree.insert(b);
-				}
-			}
-			
-			
 		}
 	}
 	
@@ -62,6 +91,17 @@ public class Solver {
 		return numOfMoves + searchNode.manhattan();
 	}
 	
+	
+	private class PriorityOrder implements Comparator<Board> {
+		public int compare(Board b1, Board b2) {
+			int f1 = Priority(b1);
+			int f2 = Priority(b2);
+			
+			if ( f1 > f2 ) return 1;
+			else if ( f1 < f2 ) return -1;
+			else return 0;
+		}
+	}
 	/*
 	 * is the initial board solvable?
 	 */
@@ -82,6 +122,10 @@ public class Solver {
      */
     public Iterable<Board> solution() {
     	if ( !this.isSolvable ) return null;
+    	else {
+    		int shortestNumOfMoves = goalPaths.firstKey();
+    		return goalPaths.get(shortestNumOfMoves);
+    	}
     }
 
 }
