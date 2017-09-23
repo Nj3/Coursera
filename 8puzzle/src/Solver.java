@@ -12,7 +12,7 @@ import edu.princeton.cs.algs4.MinPQ;
  */
 public class Solver {
 	
-	private TreeMap<Integer, List<Board>> goalPaths = new TreeMap<Integer, List<Board>>();
+	private TreeMap<Integer, List<GameBoard>> goalPaths = new TreeMap<Integer, List<GameBoard>>();
 	private int numOfMoves = 0;
 	private boolean isSolvable = false;
 	/*
@@ -30,20 +30,20 @@ public class Solver {
 		
 		// local variable declarations
 		PriorityOrder po = new PriorityOrder();
-		MinPQ<Board> gameTree = new MinPQ<Board>(po);
-		MinPQ<Board> twinGameTree = new MinPQ<Board>(po);
-		List<Board> path = new ArrayList<Board>();
-		List<Board> exploredNodes = new ArrayList<Board>();
-		Board searchNode = initial;
-		Board searchNodeTwin = initial.twin();
+		MinPQ<GameBoard> gameTree = new MinPQ<GameBoard>(po);
+		MinPQ<GameBoard> twinGameTree = new MinPQ<GameBoard>(po);
+		List<GameBoard> path = new ArrayList<GameBoard>();
+		List<GameBoard> exploredNodes = new ArrayList<GameBoard>();
+		GameBoard searchNode = new GameBoard(initial);
+		GameBoard searchNodeTwin = new GameBoard(initial.twin());
 		gameTree.insert(searchNode);
 		twinGameTree.insert(searchNodeTwin);
 		
 		// To check whether initial node is in goal state.
-		if ( searchNode.isGoal() ) {
+		if ( searchNode.currentGameboard.isGoal() ) {
 			isSolvable = true;
 			return;
-		}else if ( searchNodeTwin.isGoal() ) {
+		}else if ( searchNodeTwin.currentGameboard.isGoal() ) {
 			isSolvable = false;
 			return;
 		}
@@ -54,17 +54,16 @@ public class Solver {
 			
 			searchNode = gameTree.delMin();
 			
-			if ( searchNode.isGoal() ) {
+			if ( searchNode.currentGameboard.isGoal() ) {
 				isSolvable = true;
 				goalPaths.put(numOfMoves, path);
-				for ( Board b : path ) System.out.println(b);
 				numOfMoves = 0;
 				if ( gameTree.isEmpty() ) return;
 			}
 			// solving for actual board and add in goalpaths, map of num of moves to reach the goal and path taken to achieve it
 			if ( !exploredNodes.contains(searchNode) ) {
-				for ( Board b : searchNode.neighbors() ) {
-					if ( !exploredNodes.contains(b) ) gameTree.insert(b);
+				for ( Board b : searchNode.currentGameboard.neighbors() ) {
+					if ( !exploredNodes.contains(b) ) gameTree.insert(new GameBoard(b));
 				}
 			}
 			
@@ -79,14 +78,14 @@ public class Solver {
 			// solving the twin board. if its solvable then the initial board is unsolvable.
 			searchNodeTwin = twinGameTree.delMin();	
 			
-			if ( searchNodeTwin.isGoal() ) {
+			if ( searchNodeTwin.currentGameboard.isGoal() ) {
 				isSolvable = false;
 				return;
 			}
 			
 			if ( !exploredNodes.contains(searchNodeTwin) ) {
-				for ( Board b : searchNodeTwin.neighbors() ) {
-					if ( !exploredNodes.contains(b) ) twinGameTree.insert(b);
+				for ( Board b : searchNodeTwin.currentGameboard.neighbors() ) {
+					if ( !exploredNodes.contains(b) ) twinGameTree.insert(new GameBoard(b));
 				}
 			}
 			
@@ -97,21 +96,33 @@ public class Solver {
 		}
 	}
 	
+	
+	/* A class to store the gameboard with moves + Actual Board class
+	 * This is done because API doesn't allow moves as instance variable in Board class.
+	 */
+	private class GameBoard {
+		
+		int gameBoardManhattanDistance = 0;
+		int movesToReachCurrentBoardState = 0;
+		Board currentGameboard;
+		
+		public GameBoard(Board b) {
+			currentGameboard = b;
+			movesToReachCurrentBoardState = numOfMoves;
+			gameBoardManhattanDistance = b.manhattan();
+		}
+	}
+	
 	/*
 	 * f(n) = g(n) + h(n)
 	 * f(n) -> total cost
 	 * g(n) -> step cost
 	 * h(n) -> heuristic ( manhattan function )
 	 */
-	private int Priority(Board searchNode) {
-		return numOfMoves + searchNode.manhattan();
-	}
-	
-	
-	private class PriorityOrder implements Comparator<Board> {
-		public int compare(Board b1, Board b2) {
-			int f1 = Priority(b1);
-			int f2 = Priority(b2);
+	private class PriorityOrder implements Comparator<GameBoard> {
+		public int compare(GameBoard b1, GameBoard b2) {
+			int f1 = b1.gameBoardManhattanDistance + b1.movesToReachCurrentBoardState;
+			int f2 = b2.gameBoardManhattanDistance + b2.movesToReachCurrentBoardState;
 			
 			if ( f1 > f2 ) return 1;
 			else if ( f1 < f2 ) return -1;
@@ -140,7 +151,12 @@ public class Solver {
     	if ( !this.isSolvable ) return null;
     	else {
     		int shortestNumOfMoves = goalPaths.firstKey();
-    		return goalPaths.get(shortestNumOfMoves);
+    		List<GameBoard> temp = goalPaths.get(shortestNumOfMoves);
+    		List<Board> soln = new ArrayList<Board>();
+    		for ( GameBoard gb : temp ) {
+    			soln.add(gb.currentGameboard);
+    		}
+    		return soln;
     	}
     }
 
