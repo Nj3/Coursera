@@ -12,7 +12,7 @@ import edu.princeton.cs.algs4.MinPQ;
  */
 public class Solver {
 	
-	private TreeMap<Integer, List<GameBoard>> goalPaths = new TreeMap<Integer, List<GameBoard>>();
+	private TreeMap<Integer, List<Board>> goalPaths = new TreeMap<Integer, List<Board>>();
 	private int numOfMoves = 0;
 	private boolean isSolvable = false;
 	/*
@@ -32,8 +32,8 @@ public class Solver {
 		PriorityOrder po = new PriorityOrder();
 		MinPQ<GameBoard> gameTree = new MinPQ<GameBoard>(po);
 		MinPQ<GameBoard> twinGameTree = new MinPQ<GameBoard>(po);
-		List<GameBoard> path = new ArrayList<GameBoard>();
-		List<GameBoard> exploredNodes = new ArrayList<GameBoard>();
+		List<Board> path = new ArrayList<Board>();
+		List<Board> exploredNodes = new ArrayList<Board>();
 		GameBoard searchNode = new GameBoard(initial);
 		GameBoard searchNodeTwin = new GameBoard(initial.twin());
 		gameTree.insert(searchNode);
@@ -53,27 +53,35 @@ public class Solver {
 		while ( n < 10 ) {
 			
 			searchNode = gameTree.delMin();
+			numOfMoves = searchNode.movesToReachCurrentBoardState;
+			path.add(searchNode.currentGameboard);
 			
+			// solving for actual board and add in goalpaths, map of num of moves to reach the goal and path taken to achieve it
 			if ( searchNode.currentGameboard.isGoal() ) {
 				isSolvable = true;
 				goalPaths.put(numOfMoves, path);
-				numOfMoves = 0;
-				if ( gameTree.isEmpty() ) return;
+				// To get the path when we are finding alternate routes by popping the queue.
+				// not working. need to find different logic to find the path of alternate route to goal.
+				if ( !gameTree.isEmpty() ) {
+					GameBoard nextBoardToBeExpanded = gameTree.min();
+					int indexToBeTraced = path.indexOf(nextBoardToBeExpanded.currentGameboard) - 1;
+					System.out.println(indexToBeTraced);
+					path.subList(indexToBeTraced, path.size()).clear();
+				}
 			}
-			// solving for actual board and add in goalpaths, map of num of moves to reach the goal and path taken to achieve it
-			if ( !exploredNodes.contains(searchNode) ) {
+			
+			numOfMoves++;
+			if ( !exploredNodes.contains(searchNode.currentGameboard) ) {
 				for ( Board b : searchNode.currentGameboard.neighbors() ) {
 					if ( !exploredNodes.contains(b) ) gameTree.insert(new GameBoard(b));
 				}
 			}
 			
-			exploredNodes.add(searchNode);
-			path.add(searchNode);
-			numOfMoves++;
-			//System.out.println(" The search node in this iteration is :");
-			//System.out.println(searchNode);		
-			System.out.println(gameTree.size());
+			exploredNodes.add(searchNode.currentGameboard);
+
 			System.out.println(goalPaths.toString());
+
+			if ( gameTree.isEmpty() ) return;
 			
 			// solving the twin board. if its solvable then the initial board is unsolvable.
 			searchNodeTwin = twinGameTree.delMin();	
@@ -83,15 +91,14 @@ public class Solver {
 				return;
 			}
 			
-			if ( !exploredNodes.contains(searchNodeTwin) ) {
+			if ( !exploredNodes.contains(searchNodeTwin.currentGameboard) ) {
 				for ( Board b : searchNodeTwin.currentGameboard.neighbors() ) {
 					if ( !exploredNodes.contains(b) ) twinGameTree.insert(new GameBoard(b));
 				}
 			}
 			
-			exploredNodes.add(searchNodeTwin);
-			
-			
+			exploredNodes.add(searchNodeTwin.currentGameboard);
+			if ( twinGameTree.isEmpty() ) return;
 			n++;
 		}
 	}
@@ -139,7 +146,8 @@ public class Solver {
     /*
      * min number of moves to solve initial board; -1 if unsolvable
      */
-    public int moves() {
+    public int moves() { // won't work
+    	
     	if ( this.isSolvable ) return numOfMoves;
     	else return -1;
     }
@@ -151,11 +159,7 @@ public class Solver {
     	if ( !this.isSolvable ) return null;
     	else {
     		int shortestNumOfMoves = goalPaths.firstKey();
-    		List<GameBoard> temp = goalPaths.get(shortestNumOfMoves);
-    		List<Board> soln = new ArrayList<Board>();
-    		for ( GameBoard gb : temp ) {
-    			soln.add(gb.currentGameboard);
-    		}
+    		List<Board> soln = goalPaths.get(shortestNumOfMoves);
     		return soln;
     	}
     }
