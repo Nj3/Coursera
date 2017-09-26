@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.TreeMap;
@@ -12,7 +13,7 @@ import edu.princeton.cs.algs4.MinPQ;
  */
 public class Solver {
 	
-	private TreeMap<Integer, List<Board>> goalPaths = new TreeMap<Integer, List<Board>>();
+	private TreeMap<Integer, Board[]> goalPaths = new TreeMap<Integer, Board[]>();
 	private int numOfMoves = 0;
 	private boolean isSolvable = false;
 	/*
@@ -32,10 +33,10 @@ public class Solver {
 		PriorityOrder po = new PriorityOrder();
 		MinPQ<GameBoard> gameTree = new MinPQ<GameBoard>(po);
 		MinPQ<GameBoard> twinGameTree = new MinPQ<GameBoard>(po);
-		List<Board> path = new ArrayList<Board>();
+		Board[] path;
 		List<Board> exploredNodes = new ArrayList<Board>();
-		GameBoard searchNode = new GameBoard(initial);
-		GameBoard searchNodeTwin = new GameBoard(initial.twin());
+		GameBoard searchNode = new GameBoard(initial, null);
+		GameBoard searchNodeTwin = new GameBoard(initial.twin(), null);
 		gameTree.insert(searchNode);
 		twinGameTree.insert(searchNodeTwin);
 		
@@ -48,40 +49,39 @@ public class Solver {
 			return;
 		}
 		
-		int n = 0;
 		// Iterating through the tree to find the paths
-		while ( n < 10 ) {
+		while ( true ) {
 			
 			searchNode = gameTree.delMin();
 			numOfMoves = searchNode.movesToReachCurrentBoardState;
-			path.add(searchNode.currentGameboard);
 			
 			// solving for actual board and add in goalpaths, map of num of moves to reach the goal and path taken to achieve it
 			if ( searchNode.currentGameboard.isGoal() ) {
 				isSolvable = true;
-				goalPaths.put(numOfMoves, path);
-				// To get the path when we are finding alternate routes by popping the queue.
-				// not working. need to find different logic to find the path of alternate route to goal.
-				if ( !gameTree.isEmpty() ) {
-					GameBoard nextBoardToBeExpanded = gameTree.min();
-					int indexToBeTraced = path.indexOf(nextBoardToBeExpanded.currentGameboard) - 1;
-					System.out.println(indexToBeTraced);
-					path.subList(indexToBeTraced, path.size()).clear();
+				
+				GameBoard boardToBeAddedInPath = searchNode;
+				System.out.println(numOfMoves);
+				int i = numOfMoves;
+				path = new Board[i+1];
+				while ( i >= 0 ) {
+					path[i] = boardToBeAddedInPath.currentGameboard;
+					i--;
+					boardToBeAddedInPath = boardToBeAddedInPath.previousGameBoard;
 				}
+				goalPaths.put(numOfMoves, path);
+				
+				System.out.println(goalPaths.toString());
+				if ( gameTree.isEmpty() ) return;
+				else continue;
 			}
 			
 			numOfMoves++;
 			if ( !exploredNodes.contains(searchNode.currentGameboard) ) {
 				for ( Board b : searchNode.currentGameboard.neighbors() ) {
-					if ( !exploredNodes.contains(b) ) gameTree.insert(new GameBoard(b));
+					if ( !exploredNodes.contains(b) ) gameTree.insert(new GameBoard(b, searchNode));
 				}
 			}
-			
 			exploredNodes.add(searchNode.currentGameboard);
-
-			System.out.println(goalPaths.toString());
-
-			if ( gameTree.isEmpty() ) return;
 			
 			// solving the twin board. if its solvable then the initial board is unsolvable.
 			searchNodeTwin = twinGameTree.delMin();	
@@ -93,13 +93,12 @@ public class Solver {
 			
 			if ( !exploredNodes.contains(searchNodeTwin.currentGameboard) ) {
 				for ( Board b : searchNodeTwin.currentGameboard.neighbors() ) {
-					if ( !exploredNodes.contains(b) ) twinGameTree.insert(new GameBoard(b));
+					if ( !exploredNodes.contains(b) ) twinGameTree.insert(new GameBoard(b, searchNodeTwin));
 				}
 			}
 			
 			exploredNodes.add(searchNodeTwin.currentGameboard);
 			if ( twinGameTree.isEmpty() ) return;
-			n++;
 		}
 	}
 	
@@ -112,11 +111,15 @@ public class Solver {
 		int gameBoardManhattanDistance = 0;
 		int movesToReachCurrentBoardState = 0;
 		Board currentGameboard;
+		GameBoard previousGameBoard;
 		
-		public GameBoard(Board b) {
-			currentGameboard = b;
+		public GameBoard(Board currentBoard, GameBoard previousBoard) {
+			if ( currentBoard == null ) throw new java.lang.IllegalArgumentException("cannot have null board. Check the ip");
+			
+			currentGameboard = currentBoard;
+			previousGameBoard = previousBoard;
 			movesToReachCurrentBoardState = numOfMoves;
-			gameBoardManhattanDistance = b.manhattan();
+			gameBoardManhattanDistance = currentBoard.manhattan();
 		}
 	}
 	
@@ -146,9 +149,9 @@ public class Solver {
     /*
      * min number of moves to solve initial board; -1 if unsolvable
      */
-    public int moves() { // won't work
+    public int moves() { 
     	
-    	if ( this.isSolvable ) return numOfMoves;
+    	if ( this.isSolvable ) return goalPaths.firstKey();
     	else return -1;
     }
     
@@ -159,7 +162,7 @@ public class Solver {
     	if ( !this.isSolvable ) return null;
     	else {
     		int shortestNumOfMoves = goalPaths.firstKey();
-    		List<Board> soln = goalPaths.get(shortestNumOfMoves);
+    		List<Board> soln = Arrays.asList(goalPaths.get(shortestNumOfMoves));
     		return soln;
     	}
     }
