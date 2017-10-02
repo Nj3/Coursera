@@ -1,7 +1,7 @@
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
-import java.util.TreeMap;
 
 import edu.princeton.cs.algs4.MinPQ;
 
@@ -12,7 +12,8 @@ import edu.princeton.cs.algs4.MinPQ;
  */
 public class Solver {
 	
-	private TreeMap<Integer, Board[]> goalPaths = new TreeMap<Integer, Board[]>();
+	private List<Board> goalPaths = new ArrayList<Board>();
+	private int minMoves = 0;
 	private int numOfMoves = 0;
 	private boolean isSolvable = false;
 	/*
@@ -28,19 +29,21 @@ public class Solver {
 		if ( initial == null ) throw new java.lang.IllegalArgumentException();
 		
 		// local variable declarations
-		int minNumOfMoves = 0;
 		PriorityOrder po = new PriorityOrder();
 		MinPQ<GameBoard> gameTree = new MinPQ<GameBoard>(po);
 		MinPQ<GameBoard> twinGameTree = new MinPQ<GameBoard>(po);
 		Board[] path;
 		GameBoard searchNode = new GameBoard(initial, null);
 		GameBoard searchNodeTwin = new GameBoard(initial.twin(), null);
+		GameBoard goalBoardButOne = new GameBoard(initial, null);
+//		ArrayList<Board> exploredBoards = new ArrayList<Board>();
 		gameTree.insert(searchNode);
 		twinGameTree.insert(searchNodeTwin);
 		
 		// To check whether initial node is in goal state.
 		if ( searchNode.currentGameboard.isGoal() ) {
 			isSolvable = true;
+			goalPaths.add(searchNode.currentGameboard);
 			return;
 		}else if ( searchNodeTwin.currentGameboard.isGoal() ) {
 			isSolvable = false;
@@ -60,33 +63,40 @@ public class Solver {
 				
 				GameBoard boardToBeAddedInPath = searchNode;
 				int i = numOfMoves;
-				minNumOfMoves = numOfMoves;
 				path = new Board[i+1];
+				goalBoardButOne = searchNode.previousGameBoard;
 				while ( i >= 0 ) {
 					path[i] = boardToBeAddedInPath.currentGameboard;
 					i--;
 					boardToBeAddedInPath = boardToBeAddedInPath.previousGameBoard;
 				}
-				goalPaths.put(numOfMoves, path);
-				
-				if ( gameTree.isEmpty() ) return;
-				else continue;
+				goalPaths = Arrays.asList(path);
+				minMoves = numOfMoves;
+//				System.out.println(minMoves);
+//				System.out.println(path.toString());
 			}
 			
 			numOfMoves++;
-			// minNumOfMoves will only be set when its reached the goal state atleast once.
+			// minMoves will only be set when its reached the goal state atleast once.
 			// so we have to expanding node to take place by keeping the below condition
 			// which indicates we haven't reached the goal state yet.
-			if ( minNumOfMoves == 0 || numOfMoves < minNumOfMoves ) {
+			if ( minMoves == 0 || numOfMoves < minMoves ) {
 				for ( Board b : searchNode.currentGameboard.neighbors() ) {
 					if ( searchNode.previousGameBoard == null ) gameTree.insert(new GameBoard(b, searchNode)); // initial condition
-					else if ( !searchNode.previousGameBoard.currentGameboard.equals(b) ) gameTree.insert(new GameBoard(b, searchNode));
+					else if ( !isSolvable ) {
+						if ( !searchNode.previousGameBoard.currentGameboard.equals(b) ) gameTree.insert(new GameBoard(b, searchNode));
+					}else if ( isSolvable ) {
+						if ( b.manhattan() + numOfMoves <= goalBoardButOne.gameBoardManhattanDistance + goalBoardButOne.movesToReachCurrentBoardState ) gameTree.insert(new GameBoard(b, searchNode)); 
+					}
+					//else if ( !searchNode.previousGameBoard.currentGameboard.equals(b) ) gameTree.insert(new GameBoard(b, searchNode)); 
+//					else if ( !exploredBoards.contains(b) ) gameTree.insert(new GameBoard(b, searchNode));
 				}
 			}
-			
+//			exploredBoards.add(searchNode.currentGameboard);
 			// solving the twin board. if its solvable then the initial board is unsolvable.
 			// Only execute the below till actual board is not solvable
 			if ( !isSolvable ) {
+				if ( twinGameTree.isEmpty() ) return;
 				searchNodeTwin = twinGameTree.delMin();	
 				
 				if ( searchNodeTwin.currentGameboard.isGoal() ) {
@@ -97,9 +107,7 @@ public class Solver {
 				for ( Board b : searchNodeTwin.currentGameboard.neighbors() ) {
 					if ( searchNodeTwin.previousGameBoard == null ) twinGameTree.insert(new GameBoard(b, searchNodeTwin)); // initial condition
 					else if ( !searchNodeTwin.previousGameBoard.currentGameboard.equals(b) ) twinGameTree.insert(new GameBoard(b, searchNodeTwin));
-				}
-			
-				if ( twinGameTree.isEmpty() ) return;
+				}			
 			}
 		}
 	}
@@ -114,9 +122,7 @@ public class Solver {
 		Board currentGameboard;
 		GameBoard previousGameBoard;
 		
-		public GameBoard(Board currentBoard, GameBoard previousBoard) {
-			if ( currentBoard == null ) throw new java.lang.IllegalArgumentException("cannot have null board. Check the ip");
-			
+		public GameBoard(Board currentBoard, GameBoard previousBoard) {			
 			currentGameboard = currentBoard;
 			previousGameBoard = previousBoard;
 			movesToReachCurrentBoardState = numOfMoves;
@@ -137,9 +143,12 @@ public class Solver {
 			
 			if ( f1 > f2 ) return 1;
 			else if ( f1 < f2 ) return -1;
+			else if ( f1 == f2 && b1.gameBoardManhattanDistance > b2.gameBoardManhattanDistance ) return 1; 
+			else if ( f1 == f2 && b1.gameBoardManhattanDistance < b2.gameBoardManhattanDistance ) return -1;
 			else return 0;
+			}
 		}
-	}
+	
 	/*
 	 * is the initial board solvable?
 	 */
@@ -152,7 +161,7 @@ public class Solver {
      */
     public int moves() { 
     	
-    	if ( this.isSolvable ) return goalPaths.firstKey();
+    	if ( this.isSolvable ) return minMoves;
     	else return -1;
     }
     
@@ -161,11 +170,7 @@ public class Solver {
      */
     public Iterable<Board> solution() {
     	if ( !this.isSolvable ) return null;
-    	else {
-    		int shortestNumOfMoves = goalPaths.firstKey();
-    		List<Board> soln = Arrays.asList(goalPaths.get(shortestNumOfMoves));
-    		return soln;
-    	}
+    	else return goalPaths;
     }
 
 }

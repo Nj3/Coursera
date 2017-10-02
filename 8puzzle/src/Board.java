@@ -1,11 +1,10 @@
+import java.util.Objects;
 import java.util.Stack;
 
 public class Board {
 	
-	private int[] bord; 
+	private final int[] bord; 
 	private final int N;
-	private final int[][] board2D;
-	private Stack<Board> neighbours = new Stack<Board>();
 	private int manhattanDist = 0;
 	/*
 	 * construct a board from an n-by-n array of blocks
@@ -13,7 +12,6 @@ public class Board {
 	 */
 	public Board(int[][] blocks) {
 		N = blocks.length;
-		board2D = blocks;
 		bord = new int[N*N];
 		int k = 0;
 		for ( int i=0; i<N; ++i ) {
@@ -70,22 +68,16 @@ public class Board {
 	 * a board that is obtained by exchanging any pair of blocks
 	 */
 	public Board twin() {
-		int[][] itsTwin = new int[N][N];
-		int k = 0;
-		boolean flag = true;
-		for ( int i=0; i<N; ++i ) {
-			for ( int j=0; j<N; ++j ) {
-				if ( flag && bord[k] != 0 && bord[k+1] != 0 ) {
-					// swapping non-blank blocks only once
-					itsTwin[i][j] = bord[k+1];
-					itsTwin[i][++j] = bord[k];
-					k += 2;
-					flag = false;
-				}else {
-					itsTwin[i][j] = bord[k];
-					k++;
-				}
-			}
+		int[][] itsTwin = convert1DTo2D(bord);
+		int zeroRowPositon = findZero() / N;
+		if ( zeroRowPositon == 0) {
+			int swap = itsTwin[1][1];
+			itsTwin[1][1] = itsTwin[1][0];
+			itsTwin[1][0] = swap;
+		}else {
+			int swap = itsTwin[0][1];
+			itsTwin[0][1] = itsTwin[0][0];
+			itsTwin[0][0] = swap;
 		}
 		return new Board(itsTwin);
 	}
@@ -98,14 +90,16 @@ public class Board {
 	public boolean equals(Object y) {
 		if ( y == null) return false;
 		else if ( y == this ) return true;
+		else if ( getClass() != y.getClass() ) return false;
 		Board that = (Board) y;
+		if ( this.bord.length != that.bord.length ) return false;
 		boolean flag = false;
-		if ( that.bord.length != this.bord.length ) return false;
 		for ( int k=0; k<N*N; ++k ) {
-			if ( this.bord[k] != that.bord[k] ) {
+			if ( Objects.equals(bord[k], that.bord[k]) ) flag = true;
+			else {
 				flag = false;
-				break;
-			}else flag = true;
+				break;	
+			}
 		}
 		return flag;
 	}
@@ -125,12 +119,7 @@ public class Board {
 	 * and create a 2d array ( game board ) and return it to the caller.
 	 */
 	private int[][] swap(int x0, int y0, int x1, int y1) {
-		int[][] temp = new int[N][N];
-		for ( int i=0; i<N; ++i ) {
-			for ( int j=0; j<N; ++j ) {
-				temp[i][j] = board2D[i][j];
-			}
-		}
+		int[][] temp = convert1DTo2D(bord);
 		int swap = temp[x1][y1];
 		temp[x1][y1] = temp[x0][y0];
 		temp[x0][y0] = swap;
@@ -148,48 +137,58 @@ public class Board {
 	}
 	
 	/*
-	 * Creates a game board and pushes it in neighbour Stack
+	 * Creates a game board and returns it.
 	 */
-	private void neighbourBoardGenerator(int[] zeroIndex, int neighbourPos) {
-		int[] Index = new int[2];
-		Index = indexConverter(neighbourPos, N);
-		int[][] board = new int[N][N];
-		board = swap(zeroIndex[0], zeroIndex[1], Index[0], Index[1]);
-		neighbours.push(new Board(board));	
+	private Board neighbourBoardGenerator(int[] zeroIndex, int neighbourPos) {
+		int[] Index = indexConverter(neighbourPos, N);
+		int[][] board = swap(zeroIndex[0], zeroIndex[1], Index[0], Index[1]);
+		return new Board(board);	
+	}
+	
+	/*
+	 * Converts 1D array to 2D array.
+	 */
+	private int[][] convert1DTo2D(int[] oneDimenArray) {
+		int[][] twoDimenArray = new int[N][N];
+		int k = 0;
+		for ( int i=0; i<N; ++i ) {
+			for ( int j=0; j<N; ++j ) {
+				twoDimenArray[i][j] = oneDimenArray[k++];
+			}
+		}
+		return twoDimenArray;
 	}
 
 	/*
 	 * return all possible neighboring boards.
 	 */
 	public Iterable<Board> neighbors() {
+		Stack<Board> neighbours = new Stack<Board>();
 		int zeroPos = findZero();
-		int[] zeroIndex = new int[2];
-		
-		
 		// 2D array index conversion for zero
-		zeroIndex = indexConverter(zeroPos, N);
+		int[] zeroIndex = indexConverter(zeroPos, N);
 		
 		// Calculation of neighbours
 		
 		// Left
 		if ( zeroIndex[1] - 1 >= 0 ) {
 			int neighbourLeft = zeroPos - 1;
-			neighbourBoardGenerator(zeroIndex, neighbourLeft);
+			neighbours.push(neighbourBoardGenerator(zeroIndex, neighbourLeft));
 		}
 		// right
 		if ( zeroIndex[1] + 1 < N ) {
 			int neighbourRight = zeroPos + 1;
-			neighbourBoardGenerator(zeroIndex, neighbourRight);
+			neighbours.push(neighbourBoardGenerator(zeroIndex, neighbourRight));
 		}
 		// up
 		if ( zeroIndex[0] - 1 >= 0 ) {
 			int neighbourUp = zeroPos - N;
-			neighbourBoardGenerator(zeroIndex, neighbourUp);
+			neighbours.push(neighbourBoardGenerator(zeroIndex, neighbourUp));
 		}
 		// down
 		if ( zeroIndex[0] + 1 < N ) {
 			int neighbourDown = zeroPos + N;
-			neighbourBoardGenerator(zeroIndex, neighbourDown);
+			neighbours.push(neighbourBoardGenerator(zeroIndex, neighbourDown));
 		}
 		return neighbours;
 	}
