@@ -36,7 +36,6 @@ public class Solver {
 		GameBoard searchNode = new GameBoard(initial, null);
 		GameBoard searchNodeTwin = new GameBoard(initial.twin(), null);
 		GameBoard goalBoardButOne = new GameBoard(initial, null);
-//		ArrayList<Board> exploredBoards = new ArrayList<Board>();
 		gameTree.insert(searchNode);
 		twinGameTree.insert(searchNodeTwin);
 		
@@ -72,8 +71,6 @@ public class Solver {
 				}
 				goalPaths = Arrays.asList(path);
 				minMoves = numOfMoves;
-//				System.out.println(minMoves);
-//				System.out.println(path.toString());
 			}
 			
 			numOfMoves++;
@@ -85,14 +82,12 @@ public class Solver {
 					if ( searchNode.previousGameBoard == null ) gameTree.insert(new GameBoard(b, searchNode)); // initial condition
 					else if ( !isSolvable ) {
 						if ( !searchNode.previousGameBoard.currentGameboard.equals(b) ) gameTree.insert(new GameBoard(b, searchNode));
-					}else if ( isSolvable ) {
-						if ( b.manhattan() + numOfMoves <= goalBoardButOne.gameBoardManhattanDistance + goalBoardButOne.movesToReachCurrentBoardState ) gameTree.insert(new GameBoard(b, searchNode)); 
+					}else if ( isSolvable ) { // Once its solvable insert into PQ only when priority is lower
+						if ( b.manhattan() + numOfMoves < goalBoardButOne.gameBoardManhattanDistance + goalBoardButOne.movesToReachCurrentBoardState ) gameTree.insert(new GameBoard(b, searchNode)); 
 					}
-					//else if ( !searchNode.previousGameBoard.currentGameboard.equals(b) ) gameTree.insert(new GameBoard(b, searchNode)); 
-//					else if ( !exploredBoards.contains(b) ) gameTree.insert(new GameBoard(b, searchNode));
 				}
 			}
-//			exploredBoards.add(searchNode.currentGameboard);
+
 			// solving the twin board. if its solvable then the initial board is unsolvable.
 			// Only execute the below till actual board is not solvable
 			if ( !isSolvable ) {
