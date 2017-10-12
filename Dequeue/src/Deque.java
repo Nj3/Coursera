@@ -152,46 +152,6 @@ public class Deque<Item> implements Iterable<Item> {
     	// return an iterator over items in order from front to end
     	return new ListIterator();
     }
-    /*
-    public static void main(String[] args) {
-    	// unit testing (optional)
-    	Deque<String> deck = new Deque<String>();
-    	deck.addLast("hello");
-    	deck.addLast("can");
-    	deck.addFirst("you");
-    	deck.addLast("hear");
-    	deck.addFirst("me");
-    	for (String str:deck) {
-    		System.out.println(str);
-    	}
-    	System.out.println("head and last elements are:");
-    	System.out.println(deck.head.item + " " + deck.last.item);
-    	System.out.println("insert over, starting delete opn");
-    	System.out.println(deck.removeFirst());
-    	System.out.println(deck.removeLast());
-    	System.out.println(deck.removeLast());
-    	System.out.println(deck.removeLast());
-    	System.out.println(deck.removeFirst());
-    	System.out.println("remaining elements in deque: ");
-    	for (String str:deck) {
-    		System.out.println(str);
-    	}
-    	Deque<Integer> dkint = new Deque<Integer>();
-    	dkint.addFirst(1);
-    	dkint.addLast(2);
-    	deck.addLast("hear");
-    	deck.addFirst("me");
-    	System.out.println("remaining elements in deque: ");
-    	for (Integer i:dkint) {
-    		System.out.println(i);
-    	}
-    	dkint.removeFirst();
-    	deck.removeFirst();
-    	dkint.removeFirst();
-    	System.out.println("remaining elements in deque: last ----");
-    	for (String s:deck) {
-    		System.out.println(s);
-    	}
-    } */
+    
 
 }

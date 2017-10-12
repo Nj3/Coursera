@@ -84,18 +84,7 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
 		}
 		rq = copy;
 	}
-	/*
-	private void display() {
-		for (int i=0; i<rq.length; i++) {
-			System.out.print(rq[i]);
-		}
-	}
-	
-	private void restruct(int ind_st) {
-		for (int i = ind_st; i<size; ++i) {
-			if ( rq[i+1] != null) rq[i] = rq[i+1];
-		}
-	}*/
+
 	
 	public void enqueue(Item item) {
 		if (item == null) {
@@ -139,42 +128,5 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
 		return rq[index_for_sample];
 	}
 	
-/*	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-		RandomizedQueue<String> rand_q = new RandomizedQueue<String>();
-		int i= 0;
-		while (i < 5) {
-			String ip = StdIn.readString();
-			rand_q.enqueue(ip);
-			++i;
-		}
-		System.out.println("Initial array");
-		rand_q.display();
-		System.out.println();
-		System.out.println(rand_q.dequeue());
-		rand_q.display();
-		System.out.println(rand_q.dequeue());
-		rand_q.display();
-	
-		System.out.println("Iterator check");
-		for (String s:rand_q) {
-			System.out.println(s);
-			System.out.println("Inside foreach loop");
-			for(String sin:rand_q) {
-				System.out.println(sin);
-			}
-			System.out.println();
-		}
-		
-		System.out.println(rand_q.dequeue());
-		rand_q.display();
-		System.out.println(rand_q.dequeue());
-		rand_q.display();
-		System.out.println(rand_q.dequeue());
-		rand_q.display();
-		rand_q.enqueue("100");
-		System.out.println();
-		rand_q.display();
-	}*/
 
 }
