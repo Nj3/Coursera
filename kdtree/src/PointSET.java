@@ -112,7 +112,7 @@ public class PointSET {
 		Point2D closestPoint = null;
 		
 		for ( Point2D pt : pts ) {
-			double dist = pt.distanceTo(p);
+			double dist = pt.distanceSquaredTo(p);
 			if ( dist < minDist ) {
 				minDist = dist;
 				closestPoint = pt;
