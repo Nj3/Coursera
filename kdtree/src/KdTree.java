@@ -14,12 +14,12 @@ import edu.princeton.cs.algs4.RectHV;
  * 4. contains - checks whether the given point is already in the set.
  * 5. draw - draw all points to standard draw.
  * 6. range - all points that are inside the rectangle.
- * 7. nearest - a nearest neighbour in the set to given point p.
+ * 7. nearest - a nearest neighbor in the set to given point p.
  */
 public class KdTree {
 	
 	private int size = 0;
-	private Node root;
+	private Node root; 
 	
 	public KdTree() {
 	}
@@ -30,8 +30,9 @@ public class KdTree {
 		private Node lb; // left/bottom subtree
 		private Node rt; // right/top subtree
 		
-		public Node(Point2D pt) {
+		public Node(Point2D pt, Point2D minPt, Point2D maxPt) {
 			this.point = pt;
+			this.rect = new RectHV(minPt.x(), minPt.y(), maxPt.x(), maxPt.y());
 		}
 	}
 	
@@ -48,35 +49,73 @@ public class KdTree {
 	public int size() {
 		return size;
 	}
-	// Refactor insert and contains such that it will check for equality first.
 	
 	/*
 	 * Add the point to the tree if it's already not in the set.
 	 * At every level alternate between x and y coordinates while inserting.
 	 * 
+	 * Construct a rectangle by finding the minimum(minPt) and maximum(maxPt) Points while creating a node.
+	 * minPt and maxPt is calculated based on whether it's present in left 
+	 * or right subtree.
+	 * While traversing through the tree, minPt and maxPt is calculated recursively
+	 * with the help of current node's point(n.point) forming the boundary and previous minPt 
+	 * and maxPt.
+	 *  
 	 * @param p - point to be inserted in the set.
 	 * @throws IllegalArgumentException if p is null.
 	 */
 	public void insert(Point2D p) {
 		if ( p == null ) throw new java.lang.IllegalArgumentException();
 		
-		root = insertByX(root, p);
+		Point2D minPt = new Point2D(0,0);
+		Point2D maxPt = new Point2D(1,1);
+		root = insertByX(root, p, minPt, maxPt);
 		size++;
 	}
 	
-	private Node insertByX(Node n, Point2D p) {
-		if ( n == null ) return new Node(p);
-		if ( p.x() < n.point.x() ) n.lb = insertByY(n.lb, p);
-		else if ( p.x() >= n.point.x() ) n.rt = insertByY(n.rt, p);
-		else if ( p.x() == n.point.x() && p.y() == n.point.y() ) return n;
+	private Node insertByX(Node n, Point2D p, Point2D minPt, Point2D maxPt) {
+		if ( n == null ) return new Node(p, minPt, maxPt);
+		
+		if ( p.equals(n.point) ) return n;
+		
+		if ( p.x() < n.point.x() ) {
+			// left subtree
+			double newMaxPtX = n.point.x();
+			double newMaxPtY = maxPt.y();
+			Point2D newMaxPt = new Point2D(newMaxPtX, newMaxPtY);
+			n.lb = insertByY(n.lb, p, minPt, newMaxPt);
+		}
+		else if ( p.x() >= n.point.x() ) {
+			// right subtree
+			double newMinPtX = n.point.x();
+			double newMinPtY = minPt.y();
+			Point2D newMinPt = new Point2D(newMinPtX, newMinPtY);
+			n.rt = insertByY(n.rt, p, newMinPt, maxPt);
+		}
+
 		return n;
 	}
 	
-	private Node insertByY(Node n, Point2D p) {
-		if ( n == null ) return new Node(p);
-		if ( p.y() < n.point.y() ) n.lb = insertByX(n.lb, p);
-		else if ( p.y() >= n.point.y() ) n.rt = insertByX(n.rt, p);
-		else if ( p.x() == n.point.x() && p.y() == n.point.y() ) return n;
+	private Node insertByY(Node n, Point2D p, Point2D minPt, Point2D maxPt) {
+		if ( n == null ) return new Node(p, minPt, maxPt);
+		
+		if ( p.equals(n.point) ) return n;
+		
+		if ( p.y() < n.point.y() ) {
+			// left subtree
+			double newMaxPtY = n.point.y();
+			double newMaxPtX = maxPt.x();
+			Point2D newMaxPt = new Point2D(newMaxPtX, newMaxPtY);
+			n.lb = insertByX(n.lb, p, minPt, newMaxPt);
+		}
+		else if ( p.y() >= n.point.y() ) {
+			// right subtree
+			double newMinPtY = n.point.y();
+			double newMinPtX = minPt.x();
+			Point2D newMinPt = new Point2D(newMinPtX, newMinPtY);
+			n.rt = insertByX(n.rt, p, newMinPt, maxPt);
+		}
+		
 		return n;
 	}
 	
@@ -99,18 +138,22 @@ public class KdTree {
 	private Node searchByX(Node n, Point2D p) {
 		if ( n == null || p == null ) return null;
 		
+		if ( p.equals(n.point) ) return n;
+		
 		if ( p.x() < n.point.x() ) n.lb = searchByY(n.lb, p);
 		else if ( p.x() >= n.point.x() ) n.rt = searchByY(n.rt, p);
-		else if ( p.x() == n.point.x() && p.y() == n.point.y() ) return n;
-		return null;
+
+		return n;
 	}
 	
 	private Node searchByY(Node n, Point2D p) {
 		if ( n == null || p == null) return null;
 		
+		if ( p.equals(n.point) ) return n;
+		
 		if ( p.y() < n.point.y() ) n.lb = searchByX(n.lb, p);
 		else if ( p.y() >= n.point.y() ) n.rt = searchByX(n.rt, p);
-		else if ( p.x() == n.point.x() && p.y() == n.point.y() ) return n;
-		return null;
+
+		return n;
 	}
 }
