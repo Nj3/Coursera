@@ -1,5 +1,10 @@
+
+import java.util.ArrayList;
+
 import edu.princeton.cs.algs4.Point2D;
+import edu.princeton.cs.algs4.Queue;
 import edu.princeton.cs.algs4.RectHV;
+import edu.princeton.cs.algs4.StdDraw;
 
 /**
  * @author Nj3
@@ -155,5 +160,66 @@ public class KdTree {
 		else if ( p.y() >= n.point.y() ) n.rt = searchByX(n.rt, p);
 
 		return n;
+	}
+	
+	/*
+	 * Draw all points and lines to standard draw.
+	 */
+	public void draw() {	
+		draw(root, true); // since root starts at vertical splitting.
+	}
+	
+	private void draw(Node n, boolean isVertical) {
+		if ( n == null ) return;
+		
+		// draw all points with black color
+		StdDraw.setPenRadius(0.01);
+		StdDraw.setPenColor(StdDraw.BLACK);
+		StdDraw.point(n.point.x(), n.point.y());
+		
+		// Vertical line ( red color ) , horizonal line ( blue color)
+		if ( isVertical ) {
+			StdDraw.setPenColor(StdDraw.RED);
+			StdDraw.setPenRadius();
+			StdDraw.line(n.point.x(), n.rect.ymin(), n.point.x(), n.rect.ymax());
+		}else {
+			StdDraw.setPenColor(StdDraw.BLUE);
+			StdDraw.setPenRadius();
+			StdDraw.line(n.rect.xmin(), n.point.y(), n.rect.xmax(), n.point.y());
+		}
+		
+		// Recursively call each depth.
+		draw(n.lb, !isVertical);
+		draw(n.rt, !isVertical);
+	}
+	
+	/*
+	 * all points that are inside the rectangle (or on the boundary)
+	 * 
+	 *  @param rect - rectangle in 2D plane which may contains some points
+	 *  @throws IllegalArgumentException if rect is null
+	 */
+	public Iterable<Point2D> range(RectHV rect) {
+		if ( rect == null ) throw new java.lang.IllegalArgumentException();
+		
+		ArrayList<Point2D> pointsInRectangle = new ArrayList<Point2D>();
+		
+		pointsInRectangle = range(root, rect, pointsInRectangle);
+	}
+	
+	/* 
+	 * Helper function to do range search.
+	 * If query rectangle doesn't intersect the rectange corresponding to the current point.
+	 * skip all it's subtrees.
+	 * 
+	 * If it intersect, check whether it contains the point. If yes, add it to the list.
+	 */
+	private Iterable<Point2D> range(Node n, RectHV queryRect, ArrayList<Point2D>pointsInRectangle) {
+		if ( n == null ) return pointsInRectangle;
+		
+		if ( n.rect.intersects(queryRect) ) {
+			if ( queryRect.contains(n.point) ) pointsInRectangle.add(n.point);
+		}else return pointsInRectangle;
+		// Think how do you restrict the subtree if it doesn't intersect.
 	}
 }
