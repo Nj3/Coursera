@@ -25,6 +25,8 @@ public class KdTree {
 	
 	private int size = 0;
 	private Node root; 
+	private ArrayList<Point2D> ptsInRect = new ArrayList<Point2D>();
+	private Point2D nearestNeighbor;
 	
 	public KdTree() {
 	}
@@ -202,9 +204,9 @@ public class KdTree {
 	public Iterable<Point2D> range(RectHV rect) {
 		if ( rect == null ) throw new java.lang.IllegalArgumentException();
 		
-		ArrayList<Point2D> pointsInRectangle = new ArrayList<Point2D>();
+		range(root, rect);
 		
-		pointsInRectangle = range(root, rect, pointsInRectangle);
+		return ptsInRect;
 	}
 	
 	/* 
@@ -214,12 +216,51 @@ public class KdTree {
 	 * 
 	 * If it intersect, check whether it contains the point. If yes, add it to the list.
 	 */
-	private Iterable<Point2D> range(Node n, RectHV queryRect, ArrayList<Point2D>pointsInRectangle) {
-		if ( n == null ) return pointsInRectangle;
+	private void range(Node n, RectHV queryRect) {
+		if ( n == null ) return;
 		
 		if ( n.rect.intersects(queryRect) ) {
-			if ( queryRect.contains(n.point) ) pointsInRectangle.add(n.point);
-		}else return pointsInRectangle;
-		// Think how do you restrict the subtree if it doesn't intersect.
+			if ( queryRect.contains(n.point) ) ptsInRect.add(n.point);
+		}else return;
+		
+		range(n.lb, queryRect);
+		range(n.rt, queryRect);
+		
+		return;
 	}
+	
+	/*
+	 * a nearest neighbor in the set to point p; null if the set is empty 
+	 * 
+	 * @param p - reference point from which we will find the nearest point.
+	 * @throws IllegalArgumentException if p is null.
+	 */
+	public Point2D nearest(Point2D p) {
+		if ( p == null ) throw new java.lang.IllegalArgumentException();
+		
+		double closestDist = 3.0; // maximum possible distance squared between 2 points in a unit square won't exceed 2
+		
+		nearest(root, p,closestDist, nearestNeighbor);
+		
+		return nearestNeighbor;
+	}
+	
+	private void nearest(Node n, Point2D queryPt, double closestDist, Point2D nearestNeighbor) {			
+		double currentDist;
+		
+		if ( n == null ) return;
+				
+		currentDist = n.point.distanceSquaredTo(queryPt);
+		if ( currentDist < closestDist ) {
+			closestDist = currentDist;
+			nearestNeighbor = n.point;
+		}
+		// First choose the subtree where the query point lies.
+		if ( n.lb.rect.contains(queryPt) ) nearest(n.lb, queryPt, closestDist, nearestNeighbor);
+		if ( n.rt.rect.contains(queryPt) ) nearest(n.rt, queryPt, closestDist, nearestNeighbor);
+		// Once first subtree is traversed. look for 2nd subtree if there is a chance of closer point .
+		if ( !n.rt.rect.contains(queryPt) && n.rt.rect.distanceSquaredTo(queryPt) < closestDist ) nearest(n.rt, queryPt, closestDist, nearestNeighbor);
+		if ( !n.lb.rect.contains(queryPt) && n.lb.rect.distanceSquaredTo(queryPt) < closestDist ) nearest(n.rt, queryPt, closestDist, nearestNeighbor);
+	}
+	
 }
