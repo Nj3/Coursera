@@ -26,7 +26,6 @@ public class KdTree {
 	private int size = 0;
 	private Node root; 
 	private ArrayList<Point2D> ptsInRect = new ArrayList<Point2D>();
-	private Point2D nearestNeighbor;
 	
 	public KdTree() {
 	}
@@ -236,31 +235,44 @@ public class KdTree {
 	 * @throws IllegalArgumentException if p is null.
 	 */
 	public Point2D nearest(Point2D p) {
-		if ( p == null ) throw new java.lang.IllegalArgumentException();
+		if ( p == null ) throw new java.lang.IllegalArgumentException("There must be a query point");
 		
-		double closestDist = 3.0; // maximum possible distance squared between 2 points in a unit square won't exceed 2
+		// Initialize nearestNeighbor -> root point and closestDist to distance between root and query pt.
+		Point2D nearestNeighbor = root.point;
+		double closestDist = root.point.distanceSquaredTo(p);
 		
-		nearest(root, p,closestDist, nearestNeighbor);
-		
+		nearestNeighbor = nearest(root, p,closestDist, nearestNeighbor);
+
 		return nearestNeighbor;
 	}
 	
-	private void nearest(Node n, Point2D queryPt, double closestDist, Point2D nearestNeighbor) {			
-		double currentDist;
-		
-		if ( n == null ) return;
+	/*
+	 * Only traverse the subtree which is closer to the query point.
+	 * After first subtree is calculated, calculate the closestdist again and 
+	 * if new closestDist is greater than the second subtree distance to the queryPT.
+	 * then evaluate the second subtree else don't call it.
+	 */
+	private Point2D nearest(Node n, Point2D queryPt, double closestDist, Point2D nearestNeighbor) {
+		if ( n == null ) return nearestNeighbor;
 				
-		currentDist = n.point.distanceSquaredTo(queryPt);
+		double currentDist = n.point.distanceSquaredTo(queryPt);
 		if ( currentDist < closestDist ) {
 			closestDist = currentDist;
 			nearestNeighbor = n.point;
 		}
-		// First choose the subtree where the query point lies.
-		if ( n.lb.rect.contains(queryPt) ) nearest(n.lb, queryPt, closestDist, nearestNeighbor);
-		if ( n.rt.rect.contains(queryPt) ) nearest(n.rt, queryPt, closestDist, nearestNeighbor);
-		// Once first subtree is traversed. look for 2nd subtree if there is a chance of closer point .
-		if ( !n.rt.rect.contains(queryPt) && n.rt.rect.distanceSquaredTo(queryPt) < closestDist ) nearest(n.rt, queryPt, closestDist, nearestNeighbor);
-		if ( !n.lb.rect.contains(queryPt) && n.lb.rect.distanceSquaredTo(queryPt) < closestDist ) nearest(n.rt, queryPt, closestDist, nearestNeighbor);
+		
+		// Checking whether the left subtree is closer. If yes, update the closestDist by finding the closestPt
+		if ( n.lb != null && n.lb.rect.distanceSquaredTo(queryPt) < closestDist ) {
+			nearestNeighbor = nearest(n.lb, queryPt, closestDist, nearestNeighbor);
+			closestDist = nearestNeighbor.distanceSquaredTo(queryPt);
+		}
+		// Checking right subtree is closer. If yes, traverse the subtree. Closestdist will get updated when calling 
+		// the function.
+		if ( n.rt != null && n.rt.rect.distanceSquaredTo(queryPt) < closestDist ) {
+			nearestNeighbor = nearest(n.rt, queryPt, closestDist, nearestNeighbor);
+		}
+		
+		return nearestNeighbor;
 	}
 	
 }
