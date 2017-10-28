@@ -31,8 +31,8 @@ public class KdTree {
 	}
 	
 	private static class Node {
-		private Point2D point; // point
-		private RectHV rect; // the axis aligned rectangle corresponding to this node.
+		private final Point2D point; // point
+		private final RectHV rect; // the axis aligned rectangle corresponding to this node.
 		private Node lb; // left/bottom subtree
 		private Node rt; // right/top subtree
 		
@@ -76,11 +76,13 @@ public class KdTree {
 		Point2D minPt = new Point2D(0,0);
 		Point2D maxPt = new Point2D(1,1);
 		root = insertByX(root, p, minPt, maxPt);
-		size++;
 	}
 	
 	private Node insertByX(Node n, Point2D p, Point2D minPt, Point2D maxPt) {
-		if ( n == null ) return new Node(p, minPt, maxPt);
+		if ( n == null ) {
+			size++;
+			return new Node(p, minPt, maxPt);
+		}
 		
 		if ( p.equals(n.point) ) return n;
 		
@@ -103,7 +105,10 @@ public class KdTree {
 	}
 	
 	private Node insertByY(Node n, Point2D p, Point2D minPt, Point2D maxPt) {
-		if ( n == null ) return new Node(p, minPt, maxPt);
+		if ( n == null ) {
+			size++;
+			return new Node(p, minPt, maxPt);
+		}
 		
 		if ( p.equals(n.point) ) return n;
 		
@@ -134,33 +139,33 @@ public class KdTree {
 	public boolean contains(Point2D p) {
 		if ( p == null ) throw new java.lang.IllegalArgumentException();
 		
-		return get(p)!= null;
+		return get(p);
 	}
 	
-	private Node get(Point2D p) {
+	private boolean get(Point2D p) {
 		return searchByX(root, p);
 	}
 	
-	private Node searchByX(Node n, Point2D p) {
-		if ( n == null || p == null ) return null;
+	private boolean searchByX(Node n, Point2D p) {
+		if ( n == null || p == null ) return false;
 		
-		if ( p.equals(n.point) ) return n;
+		if ( p.equals(n.point) ) return true;
 		
-		if ( p.x() < n.point.x() ) n.lb = searchByY(n.lb, p);
-		else if ( p.x() >= n.point.x() ) n.rt = searchByY(n.rt, p);
-
-		return n;
+		if ( p.x() < n.point.x() ) return searchByY(n.lb, p);
+		else if ( p.x() >= n.point.x() ) return searchByY(n.rt, p);
+		
+		return false;
 	}
 	
-	private Node searchByY(Node n, Point2D p) {
-		if ( n == null || p == null) return null;
+	private boolean searchByY(Node n, Point2D p) {
+		if ( n == null || p == null) return false;
 		
-		if ( p.equals(n.point) ) return n;
+		if ( p.equals(n.point) ) return true;
 		
-		if ( p.y() < n.point.y() ) n.lb = searchByX(n.lb, p);
-		else if ( p.y() >= n.point.y() ) n.rt = searchByX(n.rt, p);
+		if ( p.y() < n.point.y() ) return searchByX(n.lb, p);
+		else if ( p.y() >= n.point.y() ) return searchByX(n.rt, p);
 
-		return n;
+		return false;
 	}
 	
 	/*
@@ -237,11 +242,13 @@ public class KdTree {
 	public Point2D nearest(Point2D p) {
 		if ( p == null ) throw new java.lang.IllegalArgumentException("There must be a query point");
 		
+		if ( isEmpty() ) return null;
+		
 		// Initialize nearestNeighbor -> root point and closestDist to distance between root and query pt.
 		Point2D nearestNeighbor = root.point;
-		double closestDist = root.point.distanceSquaredTo(p);
+		double closestDist = nearestNeighbor.distanceSquaredTo(p);
 		
-		nearestNeighbor = nearest(root, p,closestDist, nearestNeighbor);
+		nearestNeighbor = nearest(root, p, nearestNeighbor, closestDist);
 
 		return nearestNeighbor;
 	}
@@ -250,26 +257,41 @@ public class KdTree {
 	 * Only traverse the subtree which is closer to the query point.
 	 * After first subtree is calculated, calculate the closestdist again and 
 	 * if new closestDist is greater than the second subtree distance to the queryPT.
-	 * then evaluate the second subtree else don't call it.
+	 * then evaluate the second subtree else don't call it.\
+	 * 
+	 * @param n - node which is going to be explored.
+	 * @param queryPt - point for which we are going to find the closest point to it.
+	 * @param nearestNeighbor - closest point to the query point found
 	 */
-	private Point2D nearest(Node n, Point2D queryPt, double closestDist, Point2D nearestNeighbor) {
+	private Point2D nearest(Node n, Point2D queryPt,  Point2D nearestNeighbor, double closestDist) {
+		// Base case
 		if ( n == null ) return nearestNeighbor;
-				
-		double currentDist = n.point.distanceSquaredTo(queryPt);
-		if ( currentDist < closestDist ) {
-			closestDist = currentDist;
+		
+		// check whether node point is closer
+		double currentDistance = n.point.distanceSquaredTo(queryPt);
+		if ( currentDistance < closestDist ) {
+			closestDist = currentDistance;
 			nearestNeighbor = n.point;
 		}
+
+		// Identify which subtree to traverse first.
+		Node first = n.rt;
+		Node second = n.lb;
 		
-		// Checking whether the left subtree is closer. If yes, update the closestDist by finding the closestPt
-		if ( n.lb != null && n.lb.rect.distanceSquaredTo(queryPt) < closestDist ) {
-			nearestNeighbor = nearest(n.lb, queryPt, closestDist, nearestNeighbor);
+		if ( n.lb != null && n.lb.rect.contains(queryPt) ) {
+			first = n.lb;
+			second = n.rt;
+		}
+		// Traverse through the first subtree and identify which is the nearest neighbor and then check second subtree.
+		// for traversing the second subtree, follow the pruning rule:
+		// If closestDist found so far is > distance between rect and queryPt, then explore it.
+		// It is achieved by [Node.]rect.distanceSquaredTo(queryPt) < closestDist
+		if ( first != null && first.rect.distanceSquaredTo(queryPt) < closestDist ) {
+			nearestNeighbor = nearest(first, queryPt, nearestNeighbor, closestDist);
 			closestDist = nearestNeighbor.distanceSquaredTo(queryPt);
 		}
-		// Checking right subtree is closer. If yes, traverse the subtree. Closestdist will get updated when calling 
-		// the function.
-		if ( n.rt != null && n.rt.rect.distanceSquaredTo(queryPt) < closestDist ) {
-			nearestNeighbor = nearest(n.rt, queryPt, closestDist, nearestNeighbor);
+		if ( second != null && second.rect.distanceSquaredTo(queryPt) < closestDist ) {
+			nearestNeighbor = nearest(second, queryPt, nearestNeighbor, closestDist);
 		}
 		
 		return nearestNeighbor;
