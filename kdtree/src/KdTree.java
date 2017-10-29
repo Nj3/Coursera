@@ -25,7 +25,6 @@ public class KdTree {
 	
 	private int size = 0;
 	private Node root; 
-	private ArrayList<Point2D> ptsInRect = new ArrayList<Point2D>();
 	
 	public KdTree() {
 	}
@@ -207,10 +206,8 @@ public class KdTree {
 	 */
 	public Iterable<Point2D> range(RectHV rect) {
 		if ( rect == null ) throw new java.lang.IllegalArgumentException();
-		
-		range(root, rect);
-		
-		return ptsInRect;
+	
+		return range(root, rect, null);
 	}
 	
 	/* 
@@ -220,17 +217,19 @@ public class KdTree {
 	 * 
 	 * If it intersect, check whether it contains the point. If yes, add it to the list.
 	 */
-	private void range(Node n, RectHV queryRect) {
-		if ( n == null ) return;
+	private ArrayList<Point2D> range(Node n, RectHV queryRect, ArrayList<Point2D> ptsInRect) {
+		if ( n == null ) return ptsInRect;
 		
 		if ( n.rect.intersects(queryRect) ) {
-			if ( queryRect.contains(n.point) ) ptsInRect.add(n.point);
-		}else return;
+			if ( queryRect.contains(n.point) ) {
+				if ( !ptsInRect.contains(n.point) ) ptsInRect.add(n.point);
+			}
+		}else return ptsInRect;
 		
-		range(n.lb, queryRect);
-		range(n.rt, queryRect);
+		ptsInRect = range(n.lb, queryRect, ptsInRect);
+		ptsInRect = range(n.rt, queryRect, ptsInRect);
 		
-		return;
+		return ptsInRect;
 	}
 	
 	/*
@@ -278,9 +277,12 @@ public class KdTree {
 		Node first = n.lb;
 		Node second = n.rt;
 		
-		if ( n.rt != null && n.rt.rect.contains(queryPt) ) {
+		if ( n.lb != null && n.rt != null && n.lb.rect.distanceSquaredTo(queryPt) < n.rt.rect.distanceSquaredTo(queryPt) ) {
 			first = n.lb;
 			second = n.rt;
+		}else {
+			first = n.rt;
+			second = n.lb;
 		}
 		// Traverse through the first subtree and identify which is the nearest neighbor and then check second subtree.
 		// for traversing the second subtree, follow the pruning rule:
