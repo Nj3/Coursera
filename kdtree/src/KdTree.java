@@ -275,10 +275,10 @@ public class KdTree {
 		}
 
 		// Identify which subtree to traverse first.
-		Node first = n.rt;
-		Node second = n.lb;
+		Node first = n.lb;
+		Node second = n.rt;
 		
-		if ( n.lb != null && n.lb.rect.contains(queryPt) ) {
+		if ( n.rt != null && n.rt.rect.contains(queryPt) ) {
 			first = n.lb;
 			second = n.rt;
 		}
