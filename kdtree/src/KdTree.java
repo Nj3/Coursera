@@ -206,13 +206,15 @@ public class KdTree {
 	 */
 	public Iterable<Point2D> range(RectHV rect) {
 		if ( rect == null ) throw new java.lang.IllegalArgumentException();
+		
+		ArrayList<Point2D> ptsInsideRect = new ArrayList<Point2D>();
 	
-		return range(root, rect, null);
+		return range(root, rect, ptsInsideRect);
 	}
 	
 	/* 
 	 * Helper function to do range search.
-	 * If query rectangle doesn't intersect the rectange corresponding to the current point.
+	 * If query rectangle doesn't intersect the rectangle corresponding to the current point.
 	 * skip all it's subtrees.
 	 * 
 	 * If it intersect, check whether it contains the point. If yes, add it to the list.
