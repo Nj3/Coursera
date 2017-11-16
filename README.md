@@ -5,3 +5,5 @@
 3. Collinear Points ![score](https://img.shields.io/badge/Score-92%2F100-brightgreen.svg)
 4. 8puzzle  ![score](https://img.shields.io/badge/Score-100%2F100-brightgreen.svg)
 5. Kd-Trees ![score](https://img.shields.io/badge/Score-84%2F100-brightgreen.svg)
+
+Note: Problem statements are in coursera.org
