@@ -108,7 +108,7 @@ public class PointSET {
 		if ( p == null ) throw new java.lang.IllegalArgumentException();
 		if ( pts.isEmpty() ) return null;
 		
-		double minDist = +2.0; // Since input co-ordinates will be always between 0 and 1. Maximum possible Euclidean distance is 1.414
+		double minDist = 3.0; // maximum possible distance squared between 2 points in a unit square won't exceed 2
 		Point2D closestPoint = null;
 		
 		for ( Point2D pt : pts ) {
